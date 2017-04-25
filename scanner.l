@@ -1,88 +1,98 @@
 %{
-#include <stdio.h>
+/*
+Etapa 1 do trabalho de Compiladores (2017/1)
 
+Professor: Marcelo Johann
+
+Grupo:
+	Delton Vaz (00229779) (nick: ~davaz)
+	Flávio Keglevich (00229724)
+*/
+
+#include <stdio.h>
+#include "tokens.h"
 #include "hash.h"
-#include "y.tab.h"
 
 int running = 1;
-int lineCount = 0;
+int contadorLinhas = 1;
 
 int getLineNumber(void);
+int isRunning(void);
 void initMe();
 
 #include "main.c"
 
 %}
 
-DIGIT	[0-9]
-LETTER	[_a-zA-Z]
-%x COMM
+DIGITO		[0-9]
+CARACTERE	[_a-zA-Z]
+%x COMENTARIO
 
 %%
 
-"integer"					{return KW_INTEGER;}
-"floating"					{return KW_FLOATING;}
-"boolean"					{return KW_BOOLEAN;}
-"character"					{return KW_CHARACTER;}
-"declare"					{return KW_DECLARE;}
-"if"						{return KW_IF;}
+"byte"						{return KW_BYTE;}
+"short"						{return KW_SHORT;}
+"long"						{return KW_LONG;}
+"float"						{return KW_FLOAT;}
+"double"					{return KW_DOUBLE;}
+"when"						{return KW_WHEN;}
 "then"						{return KW_THEN;}
 "else"						{return KW_ELSE;}
 "while"						{return KW_WHILE;}
-"do"						{return KW_DO;}
-"input"						{return KW_INPUT;}
+"for"						{return KW_FOR;}
+"read"						{return KW_READ;}
+"print"						{return KW_PRINT;}
 "return"					{return KW_RETURN;}
-"output"					{return KW_OUTPUT;}
 
 "<="						{return OPERATOR_LE;}
 ">="						{return OPERATOR_GE;}
 "=="						{return OPERATOR_EQ;}
 "!="						{return OPERATOR_NE;}
 "&&"						{return OPERATOR_AND;}
-"||"						{return OPERATOR_OR;}
+"||"						{return OPERATOR_OR;}					
 
-"true"|"TRUE"					{yylval.symbol = hash_insert(SYMBOL_LIT_TRUE, yytext);		return SYMBOL_LIT_TRUE;}
-"false"|"FALSE"					{yylval.symbol = hash_insert(SYMBOL_LIT_FALSE, yytext);		return SYMBOL_LIT_FALSE;}
-{LETTER}({LETTER}|{DIGIT})*		{yylval.symbol = hash_insert(SYMBOL_IDENTIFIER, yytext);	return SYMBOL_IDENTIFIER;}
-'(\\.|[^\\'])+'			{yylval.symbol = hash_insert(SYMBOL_LIT_CHAR, yytext);		return SYMBOL_LIT_CHAR;}
-\"(\\.|[^\\"])*\"				{yylval.symbol = hash_insert(SYMBOL_LIT_STRING, yytext);	return SYMBOL_LIT_STRING;}
-{DIGIT}+\.{DIGIT}+				{yylval.symbol = hash_insert(SYMBOL_LIT_FLOATING, yytext);	return SYMBOL_LIT_FLOATING;}
-\.{DIGIT}+						{yylval.symbol = hash_insert(SYMBOL_LIT_FLOATING, yytext);	return SYMBOL_LIT_FLOATING;}
-{DIGIT}+\.						{yylval.symbol = hash_insert(TOKEN_ERROR, yytext);			return TOKEN_ERROR;}
-{DIGIT}+						{yylval.symbol = hash_insert(SYMBOL_LIT_INTEGER, yytext);	return SYMBOL_LIT_INTEGER;}
+[-;:,(){}+*/<>=!&$#]|"]"|"["        		{return yytext[0];}
 
-"-"|";"|":"|","|"("|")"|"{"|"}"		{return yytext[0];}
-"+"|"<"|">"|"="|"!"|"]"|"["|"*"		{return yytext[0];}
-"/"									{return yytext[0];}
+{CARACTERE}({CARACTERE}|{DIGITO})*		{hash_insert(TK_IDENTIFIER, yytext);return TK_IDENTIFIER;}
 
-\n									{lineCount++;}
-[ \t\v\f]
+{DIGITO}+					{hash_insert(LIT_INTEGER, yytext);return LIT_INTEGER;}
+{DIGITO}+\.{DIGITO}+				{hash_insert(LIT_REAL, yytext);return LIT_REAL;}
+\"(\\.|[^\\"|^\n])*\"				{hash_insert(LIT_STRING, yytext);return LIT_STRING;}
+"'"("\\".|[^'\n])"'"				{hash_insert(LIT_CHAR, yytext);return LIT_CHAR;}
 
 \/\/.*
-"/*"								{BEGIN(COMM);}
-<COMM>[^*\n]	
-<COMM>"*"+[^*/\n]
-<COMM>\n							{lineCount++;}
-<COMM>"*"+"/"						{BEGIN(INITIAL);}
+\n						{contadorLinhas++;}
+[ \t\v\f]
 
-.									{printf("Caracter invalido: \"%s\" na linha %d\n",
-									yytext, getLineNumber()); hash_insert(TOKEN_ERROR, yytext);return TOKEN_ERROR;}
+"/*"							BEGIN(COMENTARIO);
+<COMENTARIO>.						;
+<COMENTARIO>\n              				{contadorLinhas++;}
+<COMENTARIO>"*/"             				BEGIN(INITIAL);
+
+.						{return TOKEN_ERROR;}
 
 %%
 
 int getLineNumber(void)
 {
-	return lineCount + 1;
+	return contadorLinhas;
+}
+
+int isRunning(void)
+{
+	return running;
 }
 
 int yywrap(void)
 {
-	if (!feof(yyin)) running = 1;
-	else running = 0;
+	if (!feof(yyin)) 
+		running = 1;
+	else
+		running = 0;
 	return 1;
 }
 
 void initMe()
 {
-	hash_init();
+	hashStart();
 }
