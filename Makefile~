@@ -1,5 +1,5 @@
 #
-# UFRGS - Compiladores B - Marcelo Johann - 2017/1 - Etapa 1
+# UFRGS - Compiladores B - Marcelo Johann - 2009/2 - Etapa 1
 #
 # Makefile for single compiler call
 # All source files must be included from code embedded in scanner.l

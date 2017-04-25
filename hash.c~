@@ -208,7 +208,7 @@ void hash_print()
 	for (i = 0; i < HASH_SIZE; i++)
 	{
 		node = table[i];
-		while (node)
+		while (node != NULL)
 		{
 			printf("Endereco: %d, token: %d\n", i, node->token);
 			node = node->next;
