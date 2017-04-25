@@ -23,12 +23,11 @@ const char* getTokenName(int code);
 #define VAR_LENGTH 64
 
 typedef struct {
-	char *token;
-	int type;
-	int intToken;
-	double fltToken;
-	char chrToken;
-	int boolToken;
+	int 	integer_value;
+	float 	floating_value;
+	char 	character_value;
+	char	*string_value;
+	char	*identifier_value;
 }DADOS_TOKEN;
 
 typedef struct hash_node {

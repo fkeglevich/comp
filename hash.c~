@@ -115,14 +115,8 @@ HASH_NODE* hash_insert(int token, char *text)
 		case SYMBOL_LIT_INTEGER:
 			newNode->dados.integer_value = atoi(text);
 			break;
-		case SYMBOL_LIT_FLOATING:
-			newNode->dados.floating_value = atoi(text);
-			break;
-		case SYMBOL_LIT_TRUE:
-			newNode->dados.boolean_value = 1;
-			break;
-		case SYMBOL_LIT_FALSE:
-			newNode->dados.boolean_value = 0;
+		case SYMBOL_LIT_REAL:
+			newNode->dados.real_value = atoi(text);
 			break;
 		case SYMBOL_LIT_CHAR:
 			newNode->dados.character_value = *text;
@@ -153,7 +147,7 @@ HASH_NODE* hash_search(int token, char *text)
     HASH_NODE *searchNode = table[adress];
 
 	int integer_value;
-	float floating_value;
+	float real_value;
 	int boolean_value;
 	char character_value;
 	char *string_value;
@@ -164,14 +158,8 @@ HASH_NODE* hash_search(int token, char *text)
 		case SYMBOL_LIT_INTEGER:
 			integer_value = atoi(text);
 			break;
-		case SYMBOL_LIT_FLOATING:
-			floating_value = atoi(text);
-			break;
-		case SYMBOL_LIT_TRUE:
-			boolean_value = 1;
-			break;
-		case SYMBOL_LIT_FALSE:
-			boolean_value = 0;
+		case SYMBOL_LIT_REAL:
+			real_value = atoi(text);
 			break;
 		case SYMBOL_LIT_CHAR:
 			character_value = *text;
@@ -191,7 +179,7 @@ HASH_NODE* hash_search(int token, char *text)
     for (searchNode = table[adress]; searchNode != 0; searchNode = searchNode->next)
     {
         if (searchNode->dados.integer_value == integer_value ||
-			searchNode->dados.floating_value == floating_value ||
+			searchNode->dados.real_value == real_value ||
 			searchNode->dados.boolean_value == boolean_value ||
 			searchNode->dados.character_value == character_value ||
 			searchNode->dados.string_value == string_value ||
@@ -208,7 +196,7 @@ void hash_print()
 	for (i = 0; i < HASH_SIZE; i++)
 	{
 		node = table[i];
-		while (node != NULL)
+		while (node)
 		{
 			printf("Endereco: %d, token: %d\n", i, node->token);
 			node = node->next;

@@ -31,11 +31,12 @@
 %token OPERATOR_AND  274
 %token OPERATOR_OR   275
 
-%token<symbol> TK_IDENTIFIER 280
-%token<symbol> LIT_INTEGER   281
-%token<symbol> LIT_REAL      282
-%token<symbol> LIT_CHAR      285
-%token<symbol> LIT_STRING    286
+%token<symbol> SYMBOL_UNDEFINED 	0
+%token<symbol> TK_IDENTIFIER 		280
+%token<symbol> LIT_INTEGER   		281
+%token<symbol> LIT_REAL      		282
+%token<symbol> LIT_CHAR      		285
+%token<symbol> LIT_STRING    		286
 
 %token TOKEN_ERROR   290
 
