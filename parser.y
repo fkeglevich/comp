@@ -101,7 +101,7 @@ declara_funcao
 		;
 
 lista_parametros
-		: declara_parametro
+		: declara_parametro 
 		| declara_parametro ',' lista_parametros
 		|
 		;
@@ -111,8 +111,7 @@ declara_parametro
 		;
 
 lista_comandos
-		: comando ';'
-		| comando ';' lista_comandos
+		: comando ';' lista_comandos
 		|
 		;
 
