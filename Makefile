@@ -11,10 +11,10 @@ etapa2: y.tab.c lex.yy.c
 	gcc -o etapa2 lex.yy.c hash.c y.tab.c #main.c chamada em scanner.l
 	
 lex.yy.c: scanner.l
-	lex scanner.l
+	lex -d scanner.l
 	
 y.tab.c: parser.y
-	yacc -v parser.y
+	yacc -d -v parser.y
 	
 tgz: clean
 	tar cvzf etapa2.tgz .

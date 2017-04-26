@@ -1,5 +1,5 @@
 /*
-Etapa 2 do trabalho de Compiladores (2017/1)
+Etapa 1 do trabalho de Compiladores (2017/1)
 
 Professor: Marcelo Johann
 
@@ -22,24 +22,16 @@ const char* getTokenName(int code);
 #define HASH_SIZE 997
 #define VAR_LENGTH 64
 
-typedef struct {
-	int 	integer_value;
-	float 	real_value;
-	char 	character_value;
-	char	*string_value;
-	char	*identifier_value;
-}DADOS_TOKEN;
-
 typedef struct hash_node {
-	int token;
-	DADOS_TOKEN dados;
+	int type;
+	char *text;
 	struct hash_node *next;
 } HASH_NODE;
 
 void hashStart(void);
 int hash_code(char *text);
-HASH_NODE* hash_insert(int token, char *text);
-HASH_NODE* hash_search(int token, char *text);
+HASH_NODE* hash_insert(int type, char *text);
+HASH_NODE* hash_search(char *text);
 void hash_print(void);
 
 #endif

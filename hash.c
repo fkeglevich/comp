@@ -1,5 +1,5 @@
 /*
-Etapa 2 do trabalho de Compiladores (2017/1)
+Etapa 1 do trabalho de Compiladores (2017/1)
 
 Professor: Marcelo Johann
 
@@ -12,7 +12,7 @@ Grupo:
 #include <string.h>
 
 #include "hash.h"
-#include "tokens.h"
+#include "y.tab.h"
 
 #ifdef DEBUG_MODE
 
@@ -65,7 +65,7 @@ const char* getTokenName(int code)
 
 extern int getLineNumber();
 
-HASH_NODE *table[HASH_SIZE] = {NULL};
+HASH_NODE *table[HASH_SIZE];
 
 void hashStart(void)
 {
@@ -85,20 +85,20 @@ int hash_code(char *text)
 	return code;
 }
 
-HASH_NODE* hash_insert(int token, char *text)
+HASH_NODE* hash_insert(int type, char *text)
 {
 	HASH_NODE *newNode;
 
-	newNode = hash_search(token, text);
+	
+	newNode = hash_search(text);
 	if (newNode != 0)
+	{
 		return newNode;
+	}
     
 	int adress = hash_code(text);
-	newNode = (HASH_NODE*)malloc(sizeof(HASH_NODE));
-	newNode->next = table[adress];
-	table[adress] = newNode;
-
-	/*if (table[adress] == NULL)
+	newNode = calloc(1, sizeof(HASH_NODE));
+	if (table[adress] == NULL)
 	{
 		table[adress] = newNode;
 	}
@@ -106,84 +106,22 @@ HASH_NODE* hash_insert(int token, char *text)
 	{
 		newNode->next = table[adress];
 		table[adress] = newNode;
-	}*/
-
-    	newNode->token = token;
-
-	switch (token)
-	{
-		case LIT_INTEGER:
-			newNode->dados.integer_value = atoi(text);
-			break;
-		case LIT_REAL:
-			newNode->dados.real_value = atoi(text);
-			break;
-		case LIT_CHAR:
-			newNode->dados.character_value = *text;
-			break;
-		case LIT_STRING:
-			newNode->dados.string_value = (char*)malloc(sizeof(strlen(text)) + 1);
-			strcpy(newNode->dados.string_value, text);
-			break;
-		case TK_IDENTIFIER:
-			newNode->dados.identifier_value = (char*)malloc(sizeof(strlen(text)) + 1);
-			strcpy(newNode->dados.identifier_value, text);
-			break;
-		case 0://SYMBOL_UNDEFINED:
-			printf("Erro %s na linha: %d\n", text, getLineNumber());
-			exit(3);
-			break;
-		default:
-			newNode->dados.identifier_value = (char*)malloc(sizeof(strlen(text)) + 1);
-			strcpy(newNode->dados.identifier_value, text);
 	}
-	
-	return newNode;	
+
+    newNode->type = type;
+	newNode->text = malloc(strlen(text) + 1);
+	strcpy(newNode->text, text);
+    return newNode;
 }
 
-HASH_NODE* hash_search(int token, char *text)
+HASH_NODE* hash_search(char *text)
 {
     int adress = hash_code(text);
     HASH_NODE *searchNode = table[adress];
 
-	int integer_value;
-	float real_value;
-	int boolean_value;
-	char character_value;
-	char *string_value;
-	char *identifier_value;
-
-	switch (token)
-	{
-		case LIT_INTEGER:
-			integer_value = atoi(text);
-			break;
-		case LIT_REAL:
-			real_value = atoi(text);
-			break;
-		case LIT_CHAR:
-			character_value = *text;
-			break;
-		case LIT_STRING:
-			string_value = (char*)malloc(sizeof(strlen(text)) + 1);
-			strcpy(string_value, text);
-			break;
-		case TK_IDENTIFIER:
-			identifier_value = (char*)malloc(sizeof(strlen(text)) + 1);
-			strcpy(identifier_value, text);
-			break;
-		default:
-			;
-	}
-
     for (searchNode = table[adress]; searchNode != 0; searchNode = searchNode->next)
     {
-        if (searchNode->dados.integer_value == integer_value ||
-			searchNode->dados.real_value == real_value ||
-			searchNode->dados.character_value == character_value ||
-			searchNode->dados.string_value == string_value ||
-			searchNode->dados.identifier_value == identifier_value)
-			return searchNode;
+        if (!strcmp(text, searchNode->text)) return searchNode;
     }
     return 0;
 }
@@ -195,9 +133,9 @@ void hash_print()
 	for (i = 0; i < HASH_SIZE; i++)
 	{
 		node = table[i];
-		while (node)
+		while (node != NULL)
 		{
-			printf("Endereco: %d, token: %d\n", i, node->token);
+			printf("Endereco: %d\t%s\t(%d)\tTexto: %s\n", i, getTokenName(node->type), node->type, node->text);
 			node = node->next;
 		}
 	}

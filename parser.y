@@ -11,7 +11,9 @@ Grupo:
 %{
 #include <stdio.h>
 #include <stdlib.h>
+
 #include "hash.h"
+#include "y.tab.h"
 
 int getLineNumber(void);
 extern int yylex();
@@ -45,12 +47,11 @@ extern int yylex();
 %token OPERATOR_AND  274
 %token OPERATOR_OR   275
 
-%token<symbol> SYMBOL_UNDEFINED 	0
 %token<symbol> TK_IDENTIFIER 		280
 %token<symbol> LIT_INTEGER   		281
-%token<symbol> LIT_REAL      		282
-%token<symbol> LIT_CHAR      		285
-%token<symbol> LIT_STRING    		286
+%token<symbol> LIT_REAL      			282
+%token<symbol> LIT_CHAR      			285
+%token<symbol> LIT_STRING    			286
 
 %token TOKEN_ERROR   290
 
@@ -163,12 +164,6 @@ expressao
 		| expressao_simples operador_binario expressao_simples
 		;
 
-chama_parametros
-		: expressao
-		| expressao ',' chama_parametros
-		|
-		;
-
 expressao_simples
 		: TK_IDENTIFIER
 		| TK_IDENTIFIER '[' expressao ']'
@@ -176,7 +171,13 @@ expressao_simples
 		| literal_numerica
 		| LIT_STRING
 		;
-		
+
+chama_parametros
+		: expressao
+		| expressao ',' chama_parametros
+		|
+		;
+
 controle_de_fluxo
 		: KW_WHEN '(' expressao ')' KW_THEN comando
 		| KW_WHEN '(' expressao ')' KW_THEN comando KW_ELSE comando

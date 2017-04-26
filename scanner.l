@@ -10,8 +10,8 @@ Grupo:
 */
 
 #include <stdio.h>
-#include "tokens.h"
 #include "hash.h"
+#include "y.tab.h"
 
 int running = 1;
 int contadorLinhas = 1;

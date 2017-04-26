@@ -11,13 +11,13 @@
 #define KW_READ 266
 #define KW_RETURN 267
 #define KW_PRINT 268
+#define KW_TO 269
 #define OPERATOR_LE 270
 #define OPERATOR_GE 271
 #define OPERATOR_EQ 272
 #define OPERATOR_NE 273
 #define OPERATOR_AND 274
 #define OPERATOR_OR 275
-#define SYMBOL_UNDEFINED 0
 #define TK_IDENTIFIER 280
 #define LIT_INTEGER 281
 #define LIT_REAL 282
