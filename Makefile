@@ -14,7 +14,7 @@ lex.yy.c: scanner.l
 	lex scanner.l
 	
 y.tab.c: parser.y
-	yacc -d parser.y
+	yacc -v parser.y
 	
 tgz: clean
 	tar cvzf etapa2.tgz .

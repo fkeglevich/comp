@@ -137,21 +137,24 @@ atribuicao
 		| TK_IDENTIFIER '#' expressao '=' expressao
 		;
 
+operador_binario
+		: '+'
+		| '-'
+		| '*'
+		| '/'
+		| '>'
+		| '<'
+		| OPERATOR_LE
+		| OPERATOR_GE
+		| OPERATOR_EQ
+		| OPERATOR_NE
+		| OPERATOR_AND
+		| OPERATOR_OR
+		;
+
 expressao
-		: expressao '+' expressao
-		| expressao '-' expressao
-		| expressao '*' expressao
-		| expressao '/' expressao
-		| '-' expressao
+		: expressao operador_binario expressao
 		| '!' expressao
-		| expressao '>' expressao
-		| expressao '<' expressao
-		| expressao OPERATOR_LE expressao
-		| expressao OPERATOR_GE expressao
-		| expressao OPERATOR_EQ expressao
-		| expressao OPERATOR_NE expressao
-		| expressao OPERATOR_AND expressao
-		| expressao OPERATOR_OR expressao
 		| TK_IDENTIFIER
 		| TK_IDENTIFIER '[' LIT_INTEGER ']'
 		| LIT_INTEGER
