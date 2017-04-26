@@ -35,6 +35,13 @@ long main()
   {};
   };
 
+upsyh: short 3;
+
+short bibetinha( long bibe) 
+{
+	a = 20;
+};
+
 long incn (long x, long n)
   return x+n;
 

@@ -36,6 +36,7 @@ extern int yylex();
 %token KW_READ       266
 %token KW_RETURN     267
 %token KW_PRINT      268
+%token KW_TO      269
 
 %token OPERATOR_LE   270
 %token OPERATOR_GE   271
@@ -100,7 +101,8 @@ declara_funcao
 		;
 
 lista_parametros
-		: declara_parametro ',' lista_parametros
+		: declara_parametro
+		| declara_parametro ',' lista_parametros
 		|
 		;
 
@@ -111,6 +113,7 @@ declara_parametro
 lista_comandos
 		: comando ';'
 		| comando ';' lista_comandos
+		|
 		;
 
 comando
@@ -119,6 +122,7 @@ comando
 		| KW_READ TK_IDENTIFIER
 		| KW_PRINT expressao lista_print
 		| KW_RETURN expressao 
+		| controle_de_fluxo
 		|
 		;
 
@@ -161,20 +165,25 @@ expressao
 		;
 
 chama_parametros
-		: expressao ',' chama_parametros
+		: expressao
+		| expressao ',' chama_parametros
 		|
 		;
 
 expressao_simples
 		: TK_IDENTIFIER
-		| TK_IDENTIFIER '[' LIT_INTEGER ']'
-		//| TK_IDENTIFIER '(' chama_parametros ')'
+		| TK_IDENTIFIER '[' expressao ']'
+		| TK_IDENTIFIER '(' chama_parametros ')'
 		| literal_numerica
 		| LIT_STRING
 		;
 		
 controle_de_fluxo
-		: 
+		: KW_WHEN '(' expressao ')' KW_THEN comando
+		| KW_WHEN '(' expressao ')' KW_THEN comando KW_ELSE comando
+		| KW_WHILE '(' expressao ')' comando
+		| KW_FOR '(' TK_IDENTIFIER '=' expressao KW_TO expressao ')' comando
+		;
 
 %%
 
