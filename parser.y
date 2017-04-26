@@ -1,3 +1,12 @@
+/*
+Etapa 2 do trabalho de Compiladores (2017/1)
+
+Professor: Marcelo Johann
+
+Grupo:
+	Delton Vaz (00229779) (nick: ~davaz)
+	Flávio Keglevich (00229724)
+*/
 
 %{
 #include <stdio.h>
