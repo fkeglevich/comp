@@ -34,7 +34,7 @@ CARACTERE	[_a-zA-Z]
 "short"						{return KW_SHORT;}
 "long"						{return KW_LONG;}
 "float"						{return KW_FLOAT;}
-"double"					{return KW_DOUBLE;}
+"double"						{return KW_DOUBLE;}
 "when"						{return KW_WHEN;}
 "then"						{return KW_THEN;}
 "else"						{return KW_ELSE;}
@@ -42,34 +42,34 @@ CARACTERE	[_a-zA-Z]
 "for"						{return KW_FOR;}
 "read"						{return KW_READ;}
 "print"						{return KW_PRINT;}
-"return"					{return KW_RETURN;}
+"return"						{return KW_RETURN;}
 
 "<="						{return OPERATOR_LE;}
 ">="						{return OPERATOR_GE;}
 "=="						{return OPERATOR_EQ;}
 "!="						{return OPERATOR_NE;}
 "&&"						{return OPERATOR_AND;}
-"||"						{return OPERATOR_OR;}					
+"||"							{return OPERATOR_OR;}					
 
-[-;:,(){}+*/<>=!&$#]|"]"|"["        		{return yytext[0];}
+[-;:,(){}+*/<>=!&$#]|"]"|"["        			{return yytext[0];}
 
-{CARACTERE}({CARACTERE}|{DIGITO})*		{hash_insert(TK_IDENTIFIER, yytext);return TK_IDENTIFIER;}
+{CARACTERE}({CARACTERE}|{DIGITO})*	{hash_insert(TK_IDENTIFIER, yytext);return TK_IDENTIFIER;}
 
-{DIGITO}+					{hash_insert(LIT_INTEGER, yytext);return LIT_INTEGER;}
-{DIGITO}+\.{DIGITO}+				{hash_insert(LIT_REAL, yytext);return LIT_REAL;}
-\"(\\.|[^\\"|^\n])*\"				{hash_insert(LIT_STRING, yytext);return LIT_STRING;}
-"'"("\\".|[^'\n])"'"				{hash_insert(LIT_CHAR, yytext);return LIT_CHAR;}
+{DIGITO}+								{hash_insert(LIT_INTEGER, yytext);return LIT_INTEGER;}
+{DIGITO}+\.{DIGITO}+					{hash_insert(LIT_REAL, yytext);return LIT_REAL;}
+\"(\\.|[^\\"|^\n])*\"						{hash_insert(LIT_STRING, yytext);return LIT_STRING;}
+"'"("\\".|[^'\n])"'"							{hash_insert(LIT_CHAR, yytext);return LIT_CHAR;}
 
 \/\/.*
-\n						{contadorLinhas++;}
+\n										{contadorLinhas++;}
 [ \t\v\f]
 
-"/*"							BEGIN(COMENTARIO);
-<COMENTARIO>.						;
+"/*"										BEGIN(COMENTARIO);
+<COMENTARIO>.							;
 <COMENTARIO>\n              				{contadorLinhas++;}
 <COMENTARIO>"*/"             				BEGIN(INITIAL);
 
-.						{return TOKEN_ERROR;}
+.										{return TOKEN_ERROR;}
 
 %%
 
