@@ -53,6 +53,7 @@ extern int yylex();
 
 %token TOKEN_ERROR   290
 
+%left '!'
 %left '+' '-'
 %left '*' '/'
 %left OPERATOR_OR
@@ -71,19 +72,18 @@ declaracao
 		;
 		
 declara_variavel
-		: TK_IDENTIFIER ':' tipo_variavel inicializacao_variavel ';'
+		: TK_IDENTIFIER ':' tipo_variavel literal_numerica ';'
 		| TK_IDENTIFIER ':' tipo_variavel '[' LIT_INTEGER ']' inicializacao_vetor ';'
 		;
 
-inicializacao_variavel
+literal_numerica
 		: LIT_INTEGER
 		| LIT_REAL
 		| LIT_CHAR
 		;
 
 inicializacao_vetor
-		: inicializacao_variavel
-		| inicializacao_variavel inicializacao_vetor
+		: literal_numerica inicializacao_vetor
 		|
 		;
 
@@ -96,31 +96,26 @@ tipo_variavel
 		;
 
 declara_funcao
-		: tipo_variavel TK_IDENTIFIER '(' lista_parametros ')' comando
+		: tipo_variavel TK_IDENTIFIER '(' lista_parametros ')' comando ';'
 		;
 
 lista_parametros
-		: parametro
-		| parametro ','
+		: declara_parametro ',' lista_parametros
 		|
 		;
 
-parametro
+declara_parametro
 		: tipo_variavel TK_IDENTIFIER
-		;
-
-bloco_comandos
-		: '{' lista_comandos '}'
 		;
 
 lista_comandos
 		: comando ';'
-		|
+		| comando ';' lista_comandos
 		;
 
 comando
 		: atribuicao
-		| bloco_comandos
+		| '{' lista_comandos '}'
 		| KW_READ TK_IDENTIFIER
 		| KW_PRINT expressao lista_print
 		| KW_RETURN expressao 
@@ -152,18 +147,35 @@ operador_binario
 		| OPERATOR_OR
 		;
 
+operador_unario
+		: '!'
+		;
+
 expressao
-		: expressao operador_binario expressao
-		| '!' expressao
-		| TK_IDENTIFIER
+		: '(' expressao_simples ')'
+		| '(' operador_unario expressao_simples ')'
+		| '(' expressao_simples operador_binario expressao_simples ')'
+		| expressao_simples
+		| operador_unario expressao_simples
+		| expressao_simples operador_binario expressao_simples
+		;
+
+chama_parametros
+		: expressao ',' chama_parametros
+		|
+		;
+
+expressao_simples
+		: TK_IDENTIFIER
 		| TK_IDENTIFIER '[' LIT_INTEGER ']'
-		| LIT_INTEGER
-		| LIT_REAL
-		| LIT_CHAR
-		| LIT_INTEGER
+		//| TK_IDENTIFIER '(' chama_parametros ')'
+		| literal_numerica
 		| LIT_STRING
 		;
 		
+controle_de_fluxo
+		: 
+
 %%
 
 int yyerror(char* str)
