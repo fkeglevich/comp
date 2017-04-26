@@ -12,6 +12,10 @@ Grupo:
 #include <stdio.h>
 #include <stdlib.h>
 #include "hash.h"
+
+int getLineNumber(void);
+extern int yylex();
+
 %}  
 
 %union
@@ -149,6 +153,13 @@ expressao
 		| expressao OPERATOR_AND expressao
 		| expressao OPERATOR_OR expressao
 		| TK_IDENTIFIER
+		| TK_IDENTIFIER '[' LIT_INTEGER ']'
+		| LIT_INTEGER
+		| LIT_REAL
+		| LIT_CHAR
+		| LIT_INTEGER
+		| LIT_STRING
+		;
 		
 %%
 
