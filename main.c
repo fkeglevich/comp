@@ -28,16 +28,10 @@ int main (int argv, char **argc)
 		exit(1);
 	}
 	initMe();
-	printf("Linha:\tToken:\t\t\tTexto:\n");
-	while (isRunning())
-	{
-		token = yylex();
-		if (!isRunning()) break;
-				
-		printf("%d\t%s\t(%d)\t%s\n", getLineNumber(), getTokenName(token), token, yytext);
-	}
-	printf("Imprimindo os valores na hash: \n");
-	hash_print();
+	yyparse();
+
+	printf("Programa reconhecido com sucesso!\n");
+	exit(0);
 	
 	return 0;
 }
