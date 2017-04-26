@@ -115,13 +115,40 @@ lista_comandos
 		;
 
 comando
-		: bloco_comandos
+		: atribuicao
+		| bloco_comandos
 		| KW_READ TK_IDENTIFIER
-		| KW_RETURN TK_IDENTIFIER 
+		| KW_PRINT expressao lista_print
+		| KW_RETURN expressao 
 		|
 		;
 
+lista_print
+		: expressao lista_print
+		|
+		;
 
+atribuicao
+		: TK_IDENTIFIER '=' expressao
+		| TK_IDENTIFIER '#' expressao '=' expressao
+		;
+
+expressao
+		: expressao '+' expressao
+		| expressao '-' expressao
+		| expressao '*' expressao
+		| expressao '/' expressao
+		| '-' expressao
+		| '!' expressao
+		| expressao '>' expressao
+		| expressao '<' expressao
+		| expressao OPERATOR_LE expressao
+		| expressao OPERATOR_GE expressao
+		| expressao OPERATOR_EQ expressao
+		| expressao OPERATOR_NE expressao
+		| expressao OPERATOR_AND expressao
+		| expressao OPERATOR_OR expressao
+		| TK_IDENTIFIER
 		
 %%
 
