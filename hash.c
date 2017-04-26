@@ -89,12 +89,12 @@ HASH_NODE* hash_insert(int token, char *text)
 {
 	HASH_NODE *newNode;
 
-	newNode = hash_search(text);
+	newNode = hash_search(token, text);
 	if (newNode != 0)
 		return newNode;
     
 	int adress = hash_code(text);
-	newNode = (HASH_NODE*)calloc(sizeof(HASH_NODE));
+	newNode = (HASH_NODE*)malloc(sizeof(HASH_NODE));
 	newNode->next = table[adress];
 	table[adress] = newNode;
 
@@ -112,29 +112,29 @@ HASH_NODE* hash_insert(int token, char *text)
 
 	switch (token)
 	{
-		case SYMBOL_LIT_INTEGER:
+		case LIT_INTEGER:
 			newNode->dados.integer_value = atoi(text);
 			break;
-		case SYMBOL_LIT_REAL:
+		case LIT_REAL:
 			newNode->dados.real_value = atoi(text);
 			break;
-		case SYMBOL_LIT_CHAR:
+		case LIT_CHAR:
 			newNode->dados.character_value = *text;
 			break;
-		case SYMBOL_LIT_STRING:
-			newNode->dados.string_value = (char*)calloc(sizeof(strlen(text)) + 1);
+		case LIT_STRING:
+			newNode->dados.string_value = (char*)malloc(sizeof(strlen(text)) + 1);
 			strcpy(newNode->dados.string_value, text);
 			break;
-		case SYMBOL_IDENTIFIER:
-			newNode->dados.identifier_value = (char*)calloc(sizeof(strlen(text)) + 1);
+		case TK_IDENTIFIER:
+			newNode->dados.identifier_value = (char*)malloc(sizeof(strlen(text)) + 1);
 			strcpy(newNode->dados.identifier_value, text);
 			break;
-		case SYMBOL_UNDEFINED:
+		case 0://SYMBOL_UNDEFINED:
 			printf("Erro %s na linha: %d\n", text, getLineNumber());
 			exit(3);
 			break;
 		default:
-			newNode->dados.identifier_value = (char*)calloc(sizeof(strlen(text)) + 1);
+			newNode->dados.identifier_value = (char*)malloc(sizeof(strlen(text)) + 1);
 			strcpy(newNode->dados.identifier_value, text);
 	}
 	
@@ -155,21 +155,21 @@ HASH_NODE* hash_search(int token, char *text)
 
 	switch (token)
 	{
-		case SYMBOL_LIT_INTEGER:
+		case LIT_INTEGER:
 			integer_value = atoi(text);
 			break;
-		case SYMBOL_LIT_REAL:
+		case LIT_REAL:
 			real_value = atoi(text);
 			break;
-		case SYMBOL_LIT_CHAR:
+		case LIT_CHAR:
 			character_value = *text;
 			break;
-		case SYMBOL_LIT_STRING:
-			string_value = (char*)calloc(sizeof(strlen(text)) + 1);
+		case LIT_STRING:
+			string_value = (char*)malloc(sizeof(strlen(text)) + 1);
 			strcpy(string_value, text);
 			break;
-		case SYMBOL_IDENTIFIER:
-			identifier_value = (char*)calloc(sizeof(strlen(text)) + 1);
+		case TK_IDENTIFIER:
+			identifier_value = (char*)malloc(sizeof(strlen(text)) + 1);
 			strcpy(identifier_value, text);
 			break;
 		default:

@@ -1,51 +1,12 @@
-"Testando as strings:"
+//Testando as variáveis:
 
-"string1""string2""string3\""
-"\"\"" \" "  "\"\"\'\'\"\'""
-"string4"
-"string
-5"
-"str\ning6\n"
-"str\\ing7"
+a: short 0;
+p: long '3';
+i: long 0;
+v: long[10] 0 0 0 0 0 0 0 0 0 0;
+upsyh: float[3] 1 2 3;
+mat: long[10]; 
+f: float 10.55;
+c: byte 'x';
+d: byte 65;
 
-"Testando os números:"
-
-1 2 3456 789
-1-2-3
-2.3|2.4 4. 2.55 3.14 1,14 0.2 .2
-
-"Testando os caracteres:"
-
-'a''b''c''+''-''@''A' '''
-'\'' ' ' '	' '\t' '\\'
-'
-'
-'\n'
-
-"Testando os caracteres especiais:"
-,;:()[]{}+-*/<>=!&$=#>
-
-"Testando as palavras reservadas:"
-byte short long float double
-when then else while for read print return
-
-"Testando os identificadores:"
-variavel variavel2 var3 _var4 i+_
-2 2a a2 var_iavel v4r14v3l_ 
-
-"Testando os operadores compostos:"
-<= => >= == != && | || ||| 
-
-"Testando os comentários:"
-// Isso é um comentário
-
-/* comentário com várias coisas 1 2 3 4
-
-\n
-
-/ */
-
-/**/
-
-/**/ */ "nao-comentario"
-"Última linha: número 51"

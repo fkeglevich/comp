@@ -11,6 +11,7 @@ Grupo:
 extern int getLineNumber();
 extern int isRunning();
 extern int yylex();
+extern int yyparse();
 
 int main (int argv, char **argc)
 {

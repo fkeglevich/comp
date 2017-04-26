@@ -517,7 +517,7 @@ char *yytext;
 #line 1 "scanner.l"
 #line 2 "scanner.l"
 /*
-Etapa 1 do trabalho de Compiladores (2017/1)
+Etapa 2 do trabalho de Compiladores (2017/1)
 
 Professor: Marcelo Johann
 

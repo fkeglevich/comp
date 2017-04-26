@@ -67,120 +67,65 @@ declaracao
 		;
 		
 declara_variavel
-		: KW_DECLARE SYMBOL_IDENTIFIER ':' tipo ';'
-		| KW_DECLARE SYMBOL_IDENTIFIER ':' tipo '[' SYMBOL_LIT_INTEGER ']'';'
+		: TK_IDENTIFIER ':' tipo_variavel inicializacao_variavel ';'
+		| TK_IDENTIFIER ':' tipo_variavel '[' LIT_INTEGER ']' inicializacao_vetor ';'
 		;
-		
+
+inicializacao_variavel
+		: LIT_INTEGER
+		| LIT_REAL
+		| LIT_CHAR
+		;
+
+inicializacao_vetor
+		: inicializacao_variavel
+		| inicializacao_variavel inicializacao_vetor
+		|
+		;
+
+tipo_variavel
+		: KW_BYTE
+		| KW_SHORT
+		| KW_LONG
+		| KW_FLOAT
+		| KW_DOUBLE
+		;
+
 declara_funcao
- 		: SYMBOL_IDENTIFIER ':' tipo '(' parametros ')' ';'
-		| SYMBOL_IDENTIFIER ':' tipo '(' parametros ')' comando ';'
+		: tipo_variavel TK_IDENTIFIER '(' lista_parametros ')' comando
 		;
 
-bloco
-		: comando
-		| comando ';' bloco
-		;
-		
-comando
-		: KW_INPUT SYMBOL_IDENTIFIER
-		| KW_OUTPUT elemento
-		| KW_RETURN expressao
-		| KW_DECLARE SYMBOL_IDENTIFIER ':' tipo
-		| KW_DECLARE SYMBOL_IDENTIFIER ':' tipo '[' SYMBOL_LIT_INTEGER ']'
-		| SYMBOL_IDENTIFIER '=' expressao
-		| SYMBOL_IDENTIFIER '[' expressao ']' '=' expressao
-		| controle
-		| '{' bloco '}'
-		|
-		;
-
-elemento
-		: constante
-		| constante ',' elemento
-		| SYMBOL_IDENTIFIER
-		| SYMBOL_IDENTIFIER ',' elemento
-		;
-
-constante
-		: SYMBOL_LIT_INTEGER
-		| SYMBOL_LIT_FLOATING
-		| SYMBOL_LIT_TRUE
-		| SYMBOL_LIT_FALSE
-		| SYMBOL_LIT_CHAR
-		| SYMBOL_LIT_STRING
-		;
-
-expressao
-		: '(' expressao_primaria ')'
-		| '(' expressao_primaria operador expressao ')'
-		| expressao_primaria
-		| expressao_primaria operador expressao
-		;
-        	
-expressao_primaria
-		: SYMBOL_IDENTIFIER
-		| constante
-		| SYMBOL_IDENTIFIER '[' expressao ']'	
-		| SYMBOL_IDENTIFIER '(' chamada_parametros ')'
-		;
-		
-operador
-		: '+' 
-		| '-' 
-		| '*' 
-		| '/' 
-		| '>' 
-		| '<' 
-		| OPERATOR_AND 
-		| OPERATOR_OR 
-		| OPERATOR_LE 
-		| OPERATOR_GE 
-		| OPERATOR_EQ 
-		| OPERATOR_NE 
-		;
-
-chamada_parametro
-		: constante
-		| constante ',' chamada_parametro
-		| SYMBOL_IDENTIFIER
-		| SYMBOL_IDENTIFIER ',' chamada_parametro
-		;
-
-chamada_parametros
-		: chamada_parametro
-		|
-		;
-
-controle
-		: KW_IF '(' expressao ')' KW_THEN bloco
-		| KW_IF '(' expressao ')' KW_THEN bloco KW_ELSE bloco
-		| KW_WHILE '(' expressao ')' bloco
-		| KW_DO bloco KW_WHILE '(' expressao ')'
-		;
-
-tipo
-		: KW_INTEGER
-		| KW_FLOATING
-		| KW_CHARACTER
-		| KW_BOOLEAN
-		;
-		
-parametros
+lista_parametros
 		: parametro
+		| parametro ','
 		|
-		;	
-		
-parametro
-		: SYMBOL_IDENTIFIER ':' tipo
-		| SYMBOL_IDENTIFIER ':' tipo ',' parametro
 		;
-	
+
+parametro
+		: tipo_variavel TK_IDENTIFIER
+		;
+
+bloco_comandos
+		: '{' lista_comandos '}'
+		;
+
+lista_comandos
+		: comando ';'
+		|
+		;
+
+comando
+		: bloco_comandos
+		| KW_READ TK_IDENTIFIER
+		| KW_RETURN TK_IDENTIFIER 
+		|
+		;
 
 
-
+		
 %%
 
-int yyerror( char* str)
+int yyerror(char* str)
 {
 	printf("ERRO: \"%s\" na linha: %d\n", str, getLineNumber());
 	exit(3);
