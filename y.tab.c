@@ -22,12 +22,11 @@
 #include <stdlib.h>
 
 #include "hash.h"
-#include "y.tab.h"
 
 int getLineNumber(void);
 extern int yylex();
 
-#line 23 "parser.y"
+#line 22 "parser.y"
 #ifdef YYSTYPE
 #undef  YYSTYPE_IS_DECLARED
 #define YYSTYPE_IS_DECLARED 1
@@ -39,7 +38,7 @@ typedef union
   HASH_NODE* symbol;
   } YYSTYPE;
 #endif /* !YYSTYPE_IS_DECLARED */
-#line 43 "y.tab.c"
+#line 42 "y.tab.c"
 
 /* compatibility with bison */
 #ifdef YYPARSE_PARAM
@@ -366,14 +365,14 @@ typedef struct {
 } YYSTACKDATA;
 /* variables for the parser stack */
 static YYSTACKDATA yystack;
-#line 189 "parser.y"
+#line 182 "parser.y"
 
 int yyerror(char* str)
 {
-	printf("ERRO: \"%s\" na linha: %d\n", str, getLineNumber());
+	printf("Programa não reconhecido, erro: \"%s\" na linha: %d\n", str, getLineNumber());
 	exit(3);
 }
-#line 377 "y.tab.c"
+#line 376 "y.tab.c"
 
 #if YYDEBUG
 #include <stdio.h>		/* needed for printf */

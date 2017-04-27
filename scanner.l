@@ -13,6 +13,12 @@ Grupo:
 #include "hash.h"
 #include "y.tab.h"
 
+#define SYMBOL_LIT_INT 1
+#define SYMBOL_LIT_REAL 2
+#define SYMBOL_LIT_CHAR 3
+#define SYMBOL_LIT_STRING 4	
+#define SYMBOL_IDENTIFIER 7	
+
 int running = 1;
 int contadorLinhas = 1;
 
@@ -54,12 +60,12 @@ CARACTERE	[_a-zA-Z]
 
 [-;:,(){}+*/<>=!&$#]|"]"|"["        			{return yytext[0];}
 
-{CARACTERE}({CARACTERE}|{DIGITO})*	{hash_insert(TK_IDENTIFIER, yytext);return TK_IDENTIFIER;}
+{CARACTERE}({CARACTERE}|{DIGITO})*	{hash_insert(SYMBOL_IDENTIFIER, yytext);return TK_IDENTIFIER;}
 
-{DIGITO}+								{hash_insert(LIT_INTEGER, yytext);return LIT_INTEGER;}
-{DIGITO}+\.{DIGITO}+					{hash_insert(LIT_REAL, yytext);return LIT_REAL;}
-\"(\\.|[^\\"|^\n])*\"						{hash_insert(LIT_STRING, yytext);return LIT_STRING;}
-"'"("\\".|[^'\n])"'"							{hash_insert(LIT_CHAR, yytext);return LIT_CHAR;}
+{DIGITO}+								{hash_insert(SYMBOL_LIT_INT, yytext);return LIT_INTEGER;}
+{DIGITO}+\.{DIGITO}+					{hash_insert(SYMBOL_LIT_REAL, yytext);return LIT_REAL;}
+\"(\\.|[^\\"|^\n])*\"						{hash_insert(SYMBOL_LIT_STRING, yytext);return LIT_STRING;}
+"'"("\\".|[^'\n])"'"							{hash_insert(SYMBOL_LIT_CHAR, yytext);return LIT_CHAR;}
 
 \/\/.*
 \n										{contadorLinhas++;}

@@ -30,7 +30,6 @@ int main (int argv, char **argc)
 	}
 	initMe();
 	yyparse();
-
 	printf("Programa reconhecido com sucesso!\n");
 	exit(0);
 	

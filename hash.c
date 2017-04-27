@@ -1,5 +1,5 @@
 /*
-Etapa 1 do trabalho de Compiladores (2017/1)
+Etapa 2 do trabalho de Compiladores (2017/1)
 
 Professor: Marcelo Johann
 
@@ -24,34 +24,11 @@ int tokenArrayInit = 0;
 const char* getTokenName(int code)
 {
 	if (!tokenArrayInit) {
-		tokens[KW_BYTE] 	= "KW_BYTE ";
-		tokens[KW_SHORT]	= "KW_SHORT";
-		tokens[KW_LONG]		= "KW_LONG ";
-		tokens[KW_FLOAT] 	= "KW_FLOAT";
-		tokens[KW_DOUBLE] 	= "KW_DOUBLE";
-		tokens[KW_WHEN] 	= "KW_WHEN ";
-		tokens[KW_THEN] 	= "KW_THEN ";
-		tokens[KW_ELSE] 	= "KW_ELSE ";
-		tokens[KW_WHILE] 	= "KW_WHILE";
-		tokens[KW_FOR] 		= "KW_FOR  ";
-		tokens[KW_READ] 	= "KW_READ ";
-		tokens[KW_RETURN] 	= "KW_RETURN";
-		tokens[KW_PRINT] 	= "KW_PRINT";
-
-		tokens[OPERATOR_LE] 	= "OPERATOR_LE";
-		tokens[OPERATOR_GE] 	= "OPERATOR_GE";
-		tokens[OPERATOR_EQ] 	= "OPERATOR_EQ";
-		tokens[OPERATOR_NE] 	= "OPERATOR_NE";
-		tokens[OPERATOR_AND] 	= "OPERATOR_AND";
-		tokens[OPERATOR_OR] 	= "OPERATOR_OR";
-
-		tokens[TK_IDENTIFIER] 	= "TK_IDENTIFIER";
-		tokens[LIT_INTEGER] 	= "LIT_INTEGER";
-		tokens[LIT_REAL] 	= "LIT_REAL";
-		tokens[LIT_CHAR] 	= "LIT_CHAR";
-		tokens[LIT_STRING] 	= "LIT_STRING";
-		tokens[TOKEN_ERROR] 	= "TOKEN_ERROR";
-
+		tokens[7] 	= "SYMBOL_IDENTIFIER";
+		tokens[1] 	= "SYMBOL_LIT_INT  ";
+		tokens[2] 	= "SYMBOL_LIT_REAL  ";
+		tokens[3] 	= "SYMBOL_LIT_CHAR  ";
+		tokens[4] 	= "SYMBOL_LIT_STRING";
 		tokenArrayInit = 1;
 	}
 
@@ -64,6 +41,7 @@ const char* getTokenName(int code)
 #endif
 
 extern int getLineNumber();
+extern YYSTYPE yylval;
 
 HASH_NODE *table[HASH_SIZE];
 
@@ -71,7 +49,7 @@ void hashStart(void)
 {
 	int i;
 	for (i = 0; i < HASH_SIZE; i++)
-		table[i] = 0;
+		table[i] = NULL;
 }
 
 int hash_code(char *text)
@@ -88,7 +66,6 @@ int hash_code(char *text)
 HASH_NODE* hash_insert(int type, char *text)
 {
 	HASH_NODE *newNode;
-
 	
 	newNode = hash_search(text);
 	if (newNode != 0)
@@ -98,20 +75,17 @@ HASH_NODE* hash_insert(int type, char *text)
     
 	int adress = hash_code(text);
 	newNode = calloc(1, sizeof(HASH_NODE));
-	if (table[adress] == NULL)
-	{
-		table[adress] = newNode;
-	}
-	else
-	{
-		newNode->next = table[adress];
-		table[adress] = newNode;
-	}
 
-    newNode->type = type;
+	newNode->next = table[adress];
+	table[adress] = newNode;
+
+    	newNode->type = type;
 	newNode->text = malloc(strlen(text) + 1);
 	strcpy(newNode->text, text);
-    return newNode;
+
+	yylval.symbol = newNode;
+
+    	return newNode;
 }
 
 HASH_NODE* hash_search(char *text)
