@@ -12,6 +12,7 @@
 #define KW_RETURN 267
 #define KW_PRINT 268
 #define KW_TO 269
+#define KW_BOOL 276
 #define OPERATOR_LE 270
 #define OPERATOR_GE 271
 #define OPERATOR_EQ 272
@@ -23,6 +24,8 @@
 #define LIT_REAL 282
 #define LIT_CHAR 285
 #define LIT_STRING 286
+#define LIT_TRUE 287
+#define LIT_FALSE 288
 #define TOKEN_ERROR 290
 #ifdef YYSTYPE
 #undef  YYSTYPE_IS_DECLARED
@@ -31,8 +34,9 @@
 #ifndef YYSTYPE_IS_DECLARED
 #define YYSTYPE_IS_DECLARED 1
 typedef union
-  {
-  HASH_NODE* symbol;
-  } YYSTYPE;
+{
+	HASH_NODE* symbol;
+	AST_NODE* astNode;
+} YYSTYPE;
 #endif /* !YYSTYPE_IS_DECLARED */
 extern YYSTYPE yylval;

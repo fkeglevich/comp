@@ -1,0 +1,23 @@
+Verificações chatas:
+
+Proibir a dupla verificacao
+Todxs os identificadores precisam estar declarados
+variavel so pode ser usada SEM indexaão
+vetor so pode ser usado COM indexacao
+Funcoes so podem ser chamadas
+Colocar o datatype durante as declarações (ps terminar de criar o datatype, nos vamos precisar dele afinal AFF)
+Cada chamada de funcao deve encaixar direitnho na declaração da funcao
+
+PS1: Temos 3 naturezas dos tipos: variavel, vetor e funcao
+PS2: Temos 5 datatypes (6 pq agora precisamos do BOOL >___>) byte, short, long, float, double e FUCKING BOOL
+PS3: Temos 3 literais, inteiros, caracteres e strings
+
+Mais veriicacoes chatas:
+
+Literais inteiras so podem ser usadas no comando print
+literais inteiris e em ponto futuante sao intercambiaveis entre enpressoes, atribuicoes, eparametros de funcoes
+ 	
+	Excecao, o indice do vetr PRECISA SER UM INTEIROOOO, logo expressoes que pssam resultar em algum pinto floatoante nao podem ser usadas com indice de vetores
+
+A unica incompatibilidadeque existe nos literais numericos e com os valores booleanos q NAO PODEM se misturar
+Verificar o retorno da funcao

@@ -1,5 +1,5 @@
 /*
-Etapa 2 do trabalho de Compiladores (2017/1)
+Etapa 4 do trabalho de Compiladores (2017/1)
 
 Professor: Marcelo Johann
 
@@ -12,13 +12,14 @@ extern int getLineNumber();
 extern int isRunning();
 extern int yylex();
 extern int yyparse();
+extern FILE* OUT_FILE;
 
 int main (int argv, char **argc)
 {
 	int token;
-	if (argv < 2)
+	if (argv < 3)
 	{
-		printf("Quantidade de parametros errada!\n");
+		printf("Arquivo nao informado!\n");
 		exit(1);
 	}
 
@@ -26,10 +27,21 @@ int main (int argv, char **argc)
 	if (!yyin)
 	{
 		printf("Arquivo inexistente!\n");
+		exit(2);
+	}
+	
+	FILE* out = fopen(argc[2], "w");
+	if (!out)
+	{
+		printf("Erro ao gerar arquivo de saida!\n");
 		exit(1);
 	}
+	OUT_FILE = out;
+	
 	initMe();
 	yyparse();
+	hash_print();
+	fclose(out);
 	printf("Programa reconhecido com sucesso!\n");
 	exit(0);
 	

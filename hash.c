@@ -1,5 +1,5 @@
 /*
-Etapa 2 do trabalho de Compiladores (2017/1)
+Etapa 4 do trabalho de Compiladores (2017/1)
 
 Professor: Marcelo Johann
 
@@ -12,6 +12,7 @@ Grupo:
 #include <string.h>
 
 #include "hash.h"
+#include "ast.h"
 #include "y.tab.h"
 
 #ifdef DEBUG_MODE
@@ -29,6 +30,8 @@ const char* getTokenName(int code)
 		tokens[2] 	= "SYMBOL_LIT_REAL  ";
 		tokens[3] 	= "SYMBOL_LIT_CHAR  ";
 		tokens[4] 	= "SYMBOL_LIT_STRING";
+		tokens[5] 	= "SYMBOL_LIT_TRUE  ";
+		tokens[6] 	= "SYMBOL_LIT_FALSE";
 		tokenArrayInit = 1;
 	}
 
@@ -42,8 +45,6 @@ const char* getTokenName(int code)
 
 extern int getLineNumber();
 extern YYSTYPE yylval;
-
-HASH_NODE *table[HASH_SIZE];
 
 void hashStart(void)
 {
@@ -70,6 +71,7 @@ HASH_NODE* hash_insert(int type, char *text)
 	newNode = hash_search(text);
 	if (newNode != 0)
 	{
+		yylval.symbol = newNode;
 		return newNode;
 	}
     
@@ -79,13 +81,14 @@ HASH_NODE* hash_insert(int type, char *text)
 	newNode->next = table[adress];
 	table[adress] = newNode;
 
-    	newNode->type = type;
+	newNode->type = type;
 	newNode->text = malloc(strlen(text) + 1);
 	strcpy(newNode->text, text);
 
+	newNode->dataNature = NATURE_UNKNOWN;
 	yylval.symbol = newNode;
 
-    	return newNode;
+    return newNode;
 }
 
 HASH_NODE* hash_search(char *text)

@@ -1,6 +1,6 @@
 %{
 /*
-Etapa 2 do trabalho de Compiladores (2017/1)
+Etapa 4 do trabalho de Compiladores (2017/1)
 
 Professor: Marcelo Johann
 
@@ -10,13 +10,15 @@ Grupo:
 */
 
 #include <stdio.h>
-#include "hash.h"
+#include "semantic.h"
 #include "y.tab.h"
 
 #define SYMBOL_LIT_INT 1
 #define SYMBOL_LIT_REAL 2
 #define SYMBOL_LIT_CHAR 3
 #define SYMBOL_LIT_STRING 4	
+#define SYMBOL_LIT_TRUE 5	
+#define SYMBOL_LIT_FALSE 6	
 #define SYMBOL_IDENTIFIER 7	
 
 int running = 1;
@@ -41,6 +43,7 @@ CARACTERE	[_a-zA-Z]
 "long"						{return KW_LONG;}
 "float"						{return KW_FLOAT;}
 "double"						{return KW_DOUBLE;}
+"bool"							return KW_BOOL; //Booleano da etapa 4
 "when"						{return KW_WHEN;}
 "then"						{return KW_THEN;}
 "else"						{return KW_ELSE;}
@@ -57,7 +60,10 @@ CARACTERE	[_a-zA-Z]
 "!="						{return OPERATOR_NE;}
 "&&"						{return OPERATOR_AND;}
 "||"							{return OPERATOR_OR;}					
-
+true							{hash_insert(SYMBOL_LIT_TRUE, yytext); return LIT_TRUE;}
+TRUE							{hash_insert(SYMBOL_LIT_TRUE, yytext); return LIT_TRUE;}
+false							{hash_insert(SYMBOL_LIT_FALSE, yytext); return LIT_FALSE;}
+FALSE							{hash_insert(SYMBOL_LIT_FALSE, yytext); return LIT_FALSE;}
 [-;:,(){}+*/<>=!&$#]|"]"|"["        			{return yytext[0];}
 
 {CARACTERE}({CARACTERE}|{DIGITO})*	{hash_insert(SYMBOL_IDENTIFIER, yytext);return TK_IDENTIFIER;}
