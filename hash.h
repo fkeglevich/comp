@@ -36,6 +36,7 @@ const char* getTokenName(int code);
 #define DATATYPE_FLOAT		4
 #define DATATYPE_DOUBLE		5
 #define DATATYPE_BOOL		6
+#define DATATYPE_STRING		7
 
 typedef struct hash_node {
 	int type;
@@ -43,6 +44,7 @@ typedef struct hash_node {
 	int dataType;
 	char *text;
 	struct hash_node *next;
+	void *funcParam; // Parametros de função
 } HASH_NODE;
 
 HASH_NODE *table[HASH_SIZE];

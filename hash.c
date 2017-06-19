@@ -87,6 +87,7 @@ HASH_NODE* hash_insert(int type, char *text)
 
 	newNode->dataNature = NATURE_UNKNOWN;
 	newNode->dataType = DATATYPE_UNKNOWN;
+	newNode->funcParam = NULL;
 	yylval.symbol = newNode;
 
     return newNode;

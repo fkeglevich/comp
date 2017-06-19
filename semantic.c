@@ -22,10 +22,180 @@ void checkIdentifierExists(HASH_NODE *node)
 		semanticError();
 }
 
-//Função que checa a declaração
+void checkNature(HASH_NODE *node, int expectedNature)
+{
+	if (node->dataNature != expectedNature)
+		semanticError();
+}
+
+/*
+#define DATATYPE_UNKNOWN	0
+#define DATATYPE_BYTE		1
+#define DATATYPE_SHORT		2
+#define DATATYPE_LONG		3
+#define DATATYPE_FLOAT		4
+#define DATATYPE_DOUBLE		5
+#define DATATYPE_BOOL		6
+#define DATATYPE_STRING		7
+*/
+
+int compareDataTypes(int a, int b)
+{
+	if (a == DATATYPE_STRING || b == DATATYPE_STRING)
+		semanticError();
+
+	if (a == DATATYPE_UNKNOWN || b == DATATYPE_UNKNOWN)
+		semanticError();
+
+	if (a != DATATYPE_BOOL && b != DATATYPE_BOOL)
+	{
+		if (a > b) 
+			return a;
+		else
+			return b;
+	}
+	else
+	{
+		if (a == DATATYPE_BOOL && b == DATATYPE_BOOL)
+			return DATATYPE_BOOL;
+		else
+			semanticError();
+	}
+	return DATATYPE_UNKNOWN;
+}
+
+int getDataTypeFromVarType(AST_NODE *node)
+{
+	switch(node->type)
+	{
+		case AST_BYTE:		return DATATYPE_BYTE;
+		case AST_SHORT:		return DATATYPE_SHORT; 
+		case AST_LONG:		return DATATYPE_LONG; 
+		case AST_FLOAT:		return DATATYPE_FLOAT; 
+		case AST_DOUBLE:	return DATATYPE_DOUBLE; 				
+		case AST_BOOL:		return DATATYPE_BOOL; 
+		default:				semanticError();
+	}
+	return DATATYPE_UNKNOWN;
+}
+
+/*
+lista_parametros
+		: declara_parametro					{$$ = $1;}
+		| declara_parametro ',' lista_parametros		{$$ = ast_insert(AST_ARGS_LIST, NULL, $1, $3, NULL, NULL);}
+		|									{$$ = NULL;}
+		;
+
+declara_parametro: tipo_variavel TK_IDENTIFIER		{$$ = ast_insert(AST_DEC_ARGS, $2, $1, NULL, NULL, NULL);};
+
+chama_parametros
+		: expressao							{$$ = $1;}
+		| expressao ',' chama_parametros			{$$ = ast_insert(AST_PARAM_LIST, NULL, $1, $3, NULL, NULL);}
+		|									{$$ = NULL;}
+		;
+
+*/
+void checkParamPair(AST_NODE *declared, AST_NODE *called)
+{
+	int declaredDataType;
+
+	if (declared == NULL && called == NULL)
+		return;
+
+	if (declared == NULL && called != NULL)
+		semanticError();
+
+	if (declared != NULL && called == NULL)
+		semanticError();
+
+	if (declared->type == AST_DEC_ARGS && called->type != AST_PARAM_LIST)
+	{
+		declaredDataType = getDataTypeFromVarType(declared->children[0]);
+		compareDataTypes(declaredDataType, getExpressionDataType(called));
+		return;
+	}
+
+	if (declared->type == AST_ARGS_LIST && called->type == AST_PARAM_LIST)
+	{
+		checkParamPair(declared->children[0], called->children[0]);
+		checkParamPair(declared->children[1], called->children[1]);
+		return;
+	}
+
+	semanticError();
+}
+
+int getExpressionDataType(AST_NODE *node)
+{
+	int res;
+	switch(node->type)
+	{
+		case AST_PARENTHESES:
+			return getExpressionDataType(node->children[0]);
+
+		case AST_ADD:
+		case AST_SUB:
+		case AST_MUL:
+		case AST_DIV:
+			return compareDataTypes(getExpressionDataType(node->children[0]), getExpressionDataType(node->children[1]));
+
+		case AST_GT:
+		case AST_LT:
+		case AST_LE:
+		case AST_GE:
+			res = compareDataTypes(getExpressionDataType(node->children[0]), getExpressionDataType(node->children[1]));
+			if (res == DATATYPE_UNKNOWN || res == DATATYPE_BOOL)
+				semanticError();
+			return DATATYPE_BOOL;
+
+		case AST_EQ:
+		case AST_NE:
+			return DATATYPE_BOOL;
+
+		case AST_AND:
+		case AST_OR:
+			if (compareDataTypes(getExpressionDataType(node->children[0]), getExpressionDataType(node->children[1])) != DATATYPE_BOOL)
+				semanticError();
+			return DATATYPE_BOOL;
+
+		case AST_NOT:
+			if (getExpressionDataType(node->children[0]) != DATATYPE_BOOL)
+				semanticError();
+			return DATATYPE_BOOL;
+
+		case AST_ID:
+			checkIdentifierExists(node->symbol);
+			return node->symbol->dataType;
+
+		case AST_ID_VECTOR:
+			checkIdentifierExists(node->symbol);
+			if (compareDataTypes(getExpressionDataType(node->children[0]), DATATYPE_LONG) != DATATYPE_LONG)
+				semanticError();
+			return node->symbol->dataType;
+		
+		//| TK_IDENTIFIER '(' chama_parametros ')'	{$$ = ast_insert(AST_ID_CALL, $1, $3, NULL, NULL, NULL);}
+		case AST_ID_CALL:
+			checkIdentifierExists(node->symbol);
+			checkParamPair(node->symbol->funcParam, node->children[0]);
+			return node->symbol->dataType;
+
+		case AST_LITERAL:
+			switch(node->symbol->type)
+			{
+				case SYMBOL_LIT_INT:		return DATATYPE_LONG;
+				case SYMBOL_LIT_REAL:	return DATATYPE_DOUBLE;
+				case SYMBOL_LIT_CHAR:	return DATATYPE_BYTE;
+				case SYMBOL_LIT_STRING:	return DATATYPE_STRING;
+				case SYMBOL_LIT_TRUE:
+				case SYMBOL_LIT_FALSE:
+					return DATATYPE_BOOL;
+			}
+			break;
+	}
+}
+
 void checkDeclr(AST_NODE *node)
 {
-	//Se a variável for declarada duas vezes dá erro
 	if (node->symbol->dataNature != NATURE_UNKNOWN)
 		semanticError();
 	
@@ -33,19 +203,13 @@ void checkDeclr(AST_NODE *node)
 	{
 		case AST_VAR_DEC: 	node->symbol->dataNature = NATURE_VAR; break;
 		case AST_VEC_DEC:	node->symbol->dataNature = NATURE_VEC; break;
-		case AST_FUNC_DEC:	node->symbol->dataNature = NATURE_FUNC; break;
+		case AST_FUNC_DEC:
+			node->symbol->dataNature = NATURE_FUNC;
+			node->symbol->funcParam = node->children[1];
+			break;
 	}
 
-	switch(node->children[0]->type)
-	{
-		case AST_BYTE:		node->symbol->dataType = DATATYPE_BYTE; break;
-		case AST_SHORT:		node->symbol->dataType = DATATYPE_SHORT; break;
-		case AST_LONG:		node->symbol->dataType = DATATYPE_LONG; break;
-		case AST_FLOAT:		node->symbol->dataType = DATATYPE_FLOAT; break;
-		case AST_DOUBLE:	node->symbol->dataType = DATATYPE_DOUBLE; break;				
-		case AST_BOOL:		node->symbol->dataType = DATATYPE_BOOL; break;
-		default:				semanticError(); break;
-	}	
+	node->symbol->dataType = getDataTypeFromVarType(node->children[0]);
 }
 
 void checkChildren(AST_NODE *node)
@@ -78,6 +242,11 @@ void checkProgram(AST_NODE *node)
 			checkDeclr(node);
 			break;
 		
+		case AST_ATRIB:
+			checkIdentifierExists(node->symbol);
+			checkNature(node->symbol, NATURE_VAR);
+			break;
+
 		case AST_READ:
 			checkIdentifierExists(node->symbol);
 			break;
