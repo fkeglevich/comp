@@ -81,6 +81,7 @@ FILE* OUT_FILE;
 
 typedef struct ast_node {
 	int type;
+	int lineNumber;
 	HASH_NODE *symbol;
 	struct ast_node *children[NUM_CHILDREN];
 } AST_NODE;

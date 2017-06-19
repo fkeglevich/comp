@@ -13,6 +13,8 @@ Grupo:
 
 #include "ast.h"
 
+int getLineNumber(void);
+
 AST_NODE* ast_insert(int type, HASH_NODE *symbol, AST_NODE* c0, AST_NODE* c1, AST_NODE* c2, AST_NODE* c3)
 {
 	AST_NODE *astNode;
@@ -26,6 +28,8 @@ AST_NODE* ast_insert(int type, HASH_NODE *symbol, AST_NODE* c0, AST_NODE* c1, AS
 	astNode->children[1] = c1;
 	astNode->children[2] = c2;
 	astNode->children[3] = c3;
+
+	astNode->lineNumber = getLineNumber();
 
     	return astNode;
 }
