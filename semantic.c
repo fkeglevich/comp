@@ -10,22 +10,22 @@ Grupo:
 
 #include "semantic.h"
 
-void semanticError()
+void semanticError(const char * msg, int lineNumber)
 {
-	printf("Erro semantico!\n");
+	printf("Erro semantico (linha: %d): %s\n", lineNumber, msg);
 	exit(4);
 }
 
-void checkIdentifierExists(HASH_NODE *node)
+void checkIdentifierExists(HASH_NODE *node, int lineNumber)
 {
 	if (node->dataNature == NATURE_UNKNOWN)
-		semanticError();
+		semanticError("Identificador nao-declarado!", lineNumber);
 }
 
-void checkNature(HASH_NODE *node, int expectedNature)
+void checkNature(HASH_NODE *node, int expectedNature, int lineNumber)
 {
 	if (node->dataNature != expectedNature)
-		semanticError();
+		semanticError("Atribuicao de tipos incompativeis", lineNumber);
 }
 
 /*
@@ -39,13 +39,14 @@ void checkNature(HASH_NODE *node, int expectedNature)
 #define DATATYPE_STRING		7
 */
 
-int compareDataTypes(int a, int b)
+int compareDataTypes(int a, int b, int lineNumber)
 {
 	if (a == DATATYPE_STRING || b == DATATYPE_STRING)
-		semanticError();
+		semanticError("Literal String nao pode ser usada aqui", lineNumber);
 
+	//esse if é uma checagem extra de segurança (em tese não deveria ser necessário, mas NÉ)
 	if (a == DATATYPE_UNKNOWN || b == DATATYPE_UNKNOWN)
-		semanticError();
+		semanticError("Datatype invalido!", lineNumber);
 
 	if (a != DATATYPE_BOOL && b != DATATYPE_BOOL)
 	{
@@ -59,7 +60,7 @@ int compareDataTypes(int a, int b)
 		if (a == DATATYPE_BOOL && b == DATATYPE_BOOL)
 			return DATATYPE_BOOL;
 		else
-			semanticError();
+			semanticError("Valor booleano nao pode ser usado aqui!", lineNumber);
 	}
 	return DATATYPE_UNKNOWN;
 }
@@ -74,7 +75,7 @@ int getDataTypeFromVarType(AST_NODE *node)
 		case AST_FLOAT:		return DATATYPE_FLOAT; 
 		case AST_DOUBLE:	return DATATYPE_DOUBLE; 				
 		case AST_BOOL:		return DATATYPE_BOOL; 
-		default:				semanticError();
+		default:				semanticError("Tipo de variavel invalido!", node->lineNumber);
 	}
 	return DATATYPE_UNKNOWN;
 }
@@ -103,15 +104,15 @@ void checkParamPair(AST_NODE *declared, AST_NODE *called)
 		return;
 
 	if (declared == NULL && called != NULL)
-		semanticError();
+		semanticError("Numero de parametros errado!", called->lineNumber);
 
 	if (declared != NULL && called == NULL)
-		semanticError();
+		semanticError("Numero de parametros errado!", called->lineNumber);
 
 	if (declared->type == AST_DEC_ARGS && called->type != AST_PARAM_LIST)
 	{
 		declaredDataType = getDataTypeFromVarType(declared->children[0]);
-		compareDataTypes(declaredDataType, getExpressionDataType(called));
+		compareDataTypes(declaredDataType, getExpressionDataType(called), called->lineNumber);
 		return;
 	}
 
@@ -122,7 +123,7 @@ void checkParamPair(AST_NODE *declared, AST_NODE *called)
 		return;
 	}
 
-	semanticError();
+	semanticError("Parametros incompativeis!", called->lineNumber);
 }
 
 int getExpressionDataType(AST_NODE *node)
@@ -137,15 +138,15 @@ int getExpressionDataType(AST_NODE *node)
 		case AST_SUB:
 		case AST_MUL:
 		case AST_DIV:
-			return compareDataTypes(getExpressionDataType(node->children[0]), getExpressionDataType(node->children[1]));
+			return compareDataTypes(getExpressionDataType(node->children[0]), getExpressionDataType(node->children[1]), node->lineNumber);
 
 		case AST_GT:
 		case AST_LT:
 		case AST_LE:
 		case AST_GE:
-			res = compareDataTypes(getExpressionDataType(node->children[0]), getExpressionDataType(node->children[1]));
+			res = compareDataTypes(getExpressionDataType(node->children[0]), getExpressionDataType(node->children[1]), node->lineNumber);
 			if (res == DATATYPE_UNKNOWN || res == DATATYPE_BOOL)
-				semanticError();
+				semanticError("Tipos incompativeis para comparacao", node->lineNumber);
 			return DATATYPE_BOOL;
 
 		case AST_EQ:
@@ -154,28 +155,28 @@ int getExpressionDataType(AST_NODE *node)
 
 		case AST_AND:
 		case AST_OR:
-			if (compareDataTypes(getExpressionDataType(node->children[0]), getExpressionDataType(node->children[1])) != DATATYPE_BOOL)
-				semanticError();
+			if (compareDataTypes(getExpressionDataType(node->children[0]), getExpressionDataType(node->children[1]), node->lineNumber) != DATATYPE_BOOL)
+				semanticError("Nao eh possivel fazer essa comparacao!", node->lineNumber);
 			return DATATYPE_BOOL;
 
 		case AST_NOT:
 			if (getExpressionDataType(node->children[0]) != DATATYPE_BOOL)
-				semanticError();
+				semanticError("Operador NOT em um tipo incompativel", node->lineNumber);
 			return DATATYPE_BOOL;
 
 		case AST_ID:
-			checkIdentifierExists(node->symbol);
+			checkIdentifierExists(node->symbol, node->lineNumber);
 			return node->symbol->dataType;
 
 		case AST_ID_VECTOR:
-			checkIdentifierExists(node->symbol);
-			if (compareDataTypes(getExpressionDataType(node->children[0]), DATATYPE_LONG) != DATATYPE_LONG)
-				semanticError();
+			checkIdentifierExists(node->symbol, node->lineNumber);
+			if (compareDataTypes(getExpressionDataType(node->children[0]), DATATYPE_LONG, node->lineNumber) != DATATYPE_LONG)
+				semanticError("O indice do vetor precisa ser um inteiro!", node->lineNumber);
 			return node->symbol->dataType;
 		
 		//| TK_IDENTIFIER '(' chama_parametros ')'	{$$ = ast_insert(AST_ID_CALL, $1, $3, NULL, NULL, NULL);}
 		case AST_ID_CALL:
-			checkIdentifierExists(node->symbol);
+			checkIdentifierExists(node->symbol, node->lineNumber);
 			checkParamPair(node->symbol->funcParam, node->children[0]);
 			return node->symbol->dataType;
 
@@ -197,7 +198,7 @@ int getExpressionDataType(AST_NODE *node)
 void checkDeclr(AST_NODE *node)
 {
 	if (node->symbol->dataNature != NATURE_UNKNOWN)
-		semanticError();
+		semanticError("Indentificador ja foi declarado!", node->lineNumber);
 	
 	switch(node->type)
 	{
@@ -243,12 +244,12 @@ void checkProgram(AST_NODE *node)
 			break;
 		
 		case AST_ATRIB:
-			checkIdentifierExists(node->symbol);
-			checkNature(node->symbol, NATURE_VAR);
+			checkIdentifierExists(node->symbol, node->lineNumber);
+			checkNature(node->symbol, NATURE_VAR, node->lineNumber);
 			break;
 
 		case AST_READ:
-			checkIdentifierExists(node->symbol);
+			checkIdentifierExists(node->symbol, node->lineNumber);
 			break;
 
 		default:

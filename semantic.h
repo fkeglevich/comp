@@ -21,9 +21,9 @@ Grupo:
 #define SYMBOL_LIT_FALSE 6	
 #define SYMBOL_IDENTIFIER 7	
 
-void semanticError();
+void semanticError(const char * msg, int lineNumber);
 void checkDeclr(AST_NODE *node);
-int compareDataTypes(int a, int b);
+int compareDataTypes(int a, int b, int lineNumber);
 int getDataTypeFromVarType(AST_NODE *node);
 void checkParamPair(AST_NODE *declared, AST_NODE *called);
 int getExpressionDataType(AST_NODE *node);
