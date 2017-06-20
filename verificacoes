@@ -4,9 +4,13 @@ Verificações chatas:
 
 (OK) Todxs os identificadores precisam estar declarados
 	Nota: talvez precise verificar mais coisas nas funções, mas na dúvida VAMOS DEIXAR COMO ESTÁ E FODA-SSE
-variavel so pode ser usada SEM indexaão
-vetor so pode ser usado COM indexacao
-Funcoes so podem ser chamadas
+(OK - quase) variavel so pode ser usada SEM indexaão
+	Nota: checar atribuição de variavei, só foi feita a parte nas expressões
+(OK - quase) vetor so pode ser usado COM indexacao
+	Nota: checar atribuição de vetor, só foi feita a parte das expressões
+(OK - quase) Funcoes so podem ser chamadas
+	Nota: checar atribuição de funcao, só foi feita a parte das expressões
+
 Colocar o datatype durante as declarações (ps terminar de criar o datatype, nos vamos precisar dele afinal AFF)
 Cada chamada de funcao deve encaixar direitnho na declaração da funcao
 
