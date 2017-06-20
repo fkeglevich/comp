@@ -206,17 +206,21 @@ void checkDeclr(AST_NODE *node)
 	if (node->symbol->dataNature != NATURE_UNKNOWN)
 		semanticError("Indentificador ja foi declarado!", node->lineNumber);
 	
+	node->symbol->dataType = getDataTypeFromVarType(node->children[0]);
+
 	switch(node->type)
 	{
 		case AST_VAR_DEC: 	node->symbol->dataNature = NATURE_VAR; break;
-		case AST_VEC_DEC:	node->symbol->dataNature = NATURE_VEC; break;
+		case AST_VEC_DEC:
+			node->symbol->dataNature = NATURE_VEC;
+			if (node->symbol->dataType == DATATYPE_BOOL)
+				semanticError("Nao sao permitidos vetores de booleanos!", node->lineNumber);
+			break;
 		case AST_FUNC_DEC:
 			node->symbol->dataNature = NATURE_FUNC;
 			node->symbol->funcParam = node->children[1];
 			break;
 	}
-
-	node->symbol->dataType = getDataTypeFromVarType(node->children[0]);
 }
 
 void checkChildren(AST_NODE *node)
