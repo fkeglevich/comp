@@ -1,5 +1,5 @@
 /*
-Etapa 4 do trabalho de Compiladores (2017/1)
+Etapa 5 do trabalho de Compiladores (2017/1)
 
 Professor: Marcelo Johann
 
