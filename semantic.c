@@ -216,9 +216,11 @@ void checkDeclr(AST_NODE *node)
 			if (node->symbol->dataType == DATATYPE_BOOL)
 				semanticError("Nao sao permitidos vetores de booleanos!", node->lineNumber);
 			break;
+		//tipo_variavel TK_IDENTIFIER '(' lista_parametros ')' comando ';'	{$$ = ast_insert(AST_FUNC_DEC, $2, $1, $4, $6, NULL);};
 		case AST_FUNC_DEC:
 			node->symbol->dataNature = NATURE_FUNC;
 			node->symbol->funcParam = node->children[1];
+			checkProgram(node->children[2]);
 			break;
 	}
 }
@@ -253,14 +255,32 @@ void checkProgram(AST_NODE *node)
 			checkDeclr(node);
 			break;
 		
+		//: TK_IDENTIFIER '=' expressao				{$$ = ast_insert(AST_ATRIB, $1, $3, NULL, NULL, NULL);}
 		case AST_ATRIB:
+			//semanticError("Achou a atribuicao!", node->lineNumber);
 			checkIdentifierExists(node->symbol, node->lineNumber);
 			checkNature(node->symbol, NATURE_VAR, node->lineNumber);
+			if (compareDataTypes(getExpressionDataType(node->children[0]), node->symbol->dataType, node->lineNumber) == DATATYPE_UNKNOWN)
+				semanticError("Atribuicao incompativel!", node->lineNumber);
 			break;
+		
+		//| TK_IDENTIFIER '#' expressao '=' expressao		{$$ = ast_insert(AST_ATRIB_VECTOR, $1, $3, $5, NULL, NULL);}
+		case AST_ATRIB_VECTOR:
+			checkIdentifierExists(node->symbol, node->lineNumber);
+			checkNature(node->symbol, NATURE_VEC, node->lineNumber);
+			if (compareDataTypes(getExpressionDataType(node->children[0]), DATATYPE_LONG, node->lineNumber) != DATATYPE_LONG)
+				semanticError("O indice do vetor precisa ser um inteiro!", node->lineNumber);
+			if (compareDataTypes(getExpressionDataType(node->children[1]), node->symbol->dataType, node->lineNumber) == DATATYPE_UNKNOWN)
+				semanticError("Atribuicao incompativel!", node->lineNumber);
+			break;			
 
 		case AST_READ:
 			checkIdentifierExists(node->symbol, node->lineNumber);
 			break;
+		
+		//| KW_PRINT expressao lista_print			{$$ = ast_insert(AST_PRINT, NULL, $2, $3, NULL, NULL);}
+		//case AST_PRINT:
+			
 
 		default:
 			checkChildren(node);

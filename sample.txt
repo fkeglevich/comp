@@ -4,7 +4,6 @@ a: short 0;
 a1: long 1;
 i: long 0;
 v: long[10] 0 0 0 0 true 0 0 0 0 0;
-enor: bool[2] true true;
 mat: long[10]; 
 f: float 10.55;
 c: byte 'x';
@@ -14,6 +13,7 @@ falsiane: bool TRUE;
 long main()
   {
   a = true;
+  v#3.4 = 2;
   v#2 = v[10-1];
   for (i = 1 to 10)
     print i " ";
