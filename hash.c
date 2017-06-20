@@ -114,7 +114,7 @@ void hash_print()
 		node = table[i];
 		while (node != NULL)
 		{
-			printf("Endereco: %d\t%s\t(%d)\tTexto: %s\n", i, getTokenName(node->type), node->type, node->text);
+			printf("Endereco: %d\t%s\t(%d)\tDatatype: %d\tTexto: %s\n", i, getTokenName(node->type), node->type, node->dataType, node->text);
 			node = node->next;
 		}
 	}

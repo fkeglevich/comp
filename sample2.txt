@@ -4,22 +4,23 @@ v: long[4] 0 0 0 0;
 
 a2: short 0;
 
-long incn2 (long x, float n)
-  return 2.2;
+long incn2 (long x2, float n)
+  return main();
 
 short eno()
 {
-	a2 = 2;
+	a2 = main();
+	a2 = eno();
 };
 
 long incn3 ()
   return main();
 
-long incn (long x, long n)
+long incn (long x, long lastpar)
 {
   a2 = eno();
  print "a didi ua" "asdaaar";
-  return a2+n;
+  return a2 + lastpar * (lastpar + lastpar - 2) + incn2(v[2] + 1, 2.2);
 };
 
 
@@ -31,6 +32,7 @@ long main()
   a2 = 2;
   //v#3.4 = 2;
   //v#2 = v[10-1];
+	a2 = incn(2,2.3);
   };
 
 short voidfunc() ;

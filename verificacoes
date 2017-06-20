@@ -24,7 +24,7 @@ PS3: Temos 3 literais, inteiros, caracteres e strings	(OK)
 
 Mais veriicacoes chatas:
 
-Percorrer a AST duas vezes (a primeira só com as declarações básicas)
+(OK) Percorrer a AST duas vezes (a primeira só com as declarações básicas)
 
 (OK) Literais strings so podem ser usadas no comando print
 
@@ -36,4 +36,5 @@ Percorrer a AST duas vezes (a primeira só com as declarações básicas)
 (OK) A unica incompatibilidadeque existe nos literais numericos e com os valores booleanos q NAO PODEM se misturar
 	Nota: checar atribuição e expressão
 
-Verificar o retorno da funcao (só checar que o datatype da expressao do "return {expr}" coiseia com o da função que ele tá retornando)
+(OK) Verificar o retorno da funcao (só checar que o datatype da expressao do "return {expr}" coiseia com o da função que ele tá retornando)
+	Nota: o retorno pode ser qqlr coisa exceto bool ;)

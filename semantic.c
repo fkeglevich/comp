@@ -19,7 +19,10 @@ void semanticError(const char * msg, int lineNumber)
 void checkIdentifierExists(HASH_NODE *node, int lineNumber)
 {
 	if (node->dataNature == NATURE_UNKNOWN)
+	{	
+		printf("Identificador: %s\n", node->text);
 		semanticError("Identificador nao-declarado!", lineNumber);
+	}
 }
 
 void checkNature(HASH_NODE *node, int expectedNature, int lineNumber)
@@ -200,6 +203,35 @@ int getExpressionDataType(AST_NODE *node)
 	}
 }
 
+/*
+lista_parametros
+		: declara_parametro					{$$ = $1;}
+		| declara_parametro ',' lista_parametros		{$$ = ast_insert(AST_ARGS_LIST, NULL, $1, $3, NULL, NULL);}
+		|									{$$ = NULL;}
+		;
+
+declara_parametro: tipo_variavel TK_IDENTIFIER		{$$ = ast_insert(AST_DEC_ARGS, $2, $1, NULL, NULL, NULL);};
+*/
+void updateParamsDatatypes(AST_NODE *node)
+{
+	if (node == NULL)
+		return;
+
+	if (node->type == AST_DEC_ARGS)
+	{
+		if (node->symbol->dataNature != NATURE_UNKNOWN)
+			semanticError("Parametro com nome ambiguo!", node->lineNumber);
+
+		node->symbol->dataType = getDataTypeFromVarType(node->children[0]);
+		node->symbol->dataNature = NATURE_VAR;
+	}
+	else if (node->type == AST_ARGS_LIST)
+	{
+		updateParamsDatatypes(node->children[0]);
+		updateParamsDatatypes(node->children[1]);
+	}
+}
+
 void checkDeclr(AST_NODE *node)
 {
 	if (node->symbol->dataNature != NATURE_UNKNOWN)
@@ -219,18 +251,26 @@ void checkDeclr(AST_NODE *node)
 		case AST_FUNC_DEC:
 			node->symbol->dataNature = NATURE_FUNC;
 			node->symbol->funcParam = node->children[1];
-			checkProgram(node->children[2]);
+			updateParamsDatatypes(node->children[1]);
+			//fullCheck(node->children[2]);
 			break;
 	}
+}
+
+void fullCheck(AST_NODE *node);
+
+void checkDeclrFull(AST_NODE *node)
+{
+	//checkDeclr(node);
+	if (node->type == AST_FUNC_DEC)
+		fullCheck(node->children[2]);
 }
 
 void checkChildren(AST_NODE *node)
 {
 	int i;
 	for (i = 0; i < NUM_CHILDREN; i++)
-	{
-		checkProgram(node->children[i]);	
-	}
+		fullCheck(node->children[i]);	
 }
 
 //TK_IDENTIFIER '=' expressao	
@@ -238,7 +278,7 @@ void checkChildren(AST_NODE *node)
 //tem que existir
 //tem que ter tipos compativeis, number/float <--> number/float ou bool <-> bool
 
-void checkProgram(AST_NODE *node)
+void fullCheck(AST_NODE *node)
 {
 	if (node == NULL) return;
 
@@ -251,7 +291,7 @@ void checkProgram(AST_NODE *node)
 		case AST_VAR_DEC:
 		case AST_VEC_DEC:
 		case AST_FUNC_DEC:
-			checkDeclr(node);
+			checkDeclrFull(node);
 			break;
 		
 		//: TK_IDENTIFIER '=' expressao				{$$ = ast_insert(AST_ATRIB, $1, $3, NULL, NULL, NULL);}
@@ -288,3 +328,30 @@ void checkProgram(AST_NODE *node)
 			break;
 	}
 }	
+
+void firstTreePass(AST_NODE *node)
+{
+	int i;
+
+	if (node == NULL) return;
+
+	switch(node->type)
+	{
+		case AST_PROGRAM:
+			for (i = 0; i < NUM_CHILDREN; i++)
+				firstTreePass(node->children[i]);	
+			break;
+
+		case AST_VAR_DEC:
+		case AST_VEC_DEC:
+		case AST_FUNC_DEC:
+			checkDeclr(node);
+			break;
+	}
+}
+
+void checkProgram(AST_NODE *node)
+{
+	firstTreePass(node);
+	fullCheck(node);
+}
