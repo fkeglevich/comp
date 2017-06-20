@@ -1,0 +1,34 @@
+// UFRGS - Compiladores - Marcelo Johann - 2017/1
+
+v: long[4] 0 0 0 0;
+
+a2: short 0;
+
+long incn2 (long x, float n)
+  return main();
+
+long incn3 ()
+  return main();
+
+long incn (long x, long n)
+{
+   //v#true = 2;
+  a2 = incn3();
+  return a2+n;
+};
+
+
+
+
+
+long main()
+  {
+  a2 = 2;
+  //v#3.4 = 2;
+  //v#2 = v[10-1];
+  };
+
+short voidfunc() ;
+  
+
+

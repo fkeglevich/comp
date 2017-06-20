@@ -25,7 +25,7 @@ void semanticError(const char * msg, int lineNumber);
 void checkDeclr(AST_NODE *node);
 int compareDataTypes(int a, int b, int lineNumber);
 int getDataTypeFromVarType(AST_NODE *node);
-void checkParamPair(AST_NODE *declared, AST_NODE *called);
+void checkParamPair(AST_NODE *declared, AST_NODE *called, int funcLineNumber);
 int getExpressionDataType(AST_NODE *node);
 void checkIdentifier(HASH_NODE *node);
 void checkChildren(AST_NODE *node);

@@ -1,6 +1,10 @@
 // UFRGS - Compiladores - Marcelo Johann - 2017/1
 
-a: short 0;
+long incn (long x, long n)
+  return a2+n;
+
+
+a2: short 0;
 a1: long 1;
 i: long 0;
 v: long[10] 0 0 0 0 true 0 0 0 0 0;
@@ -12,7 +16,7 @@ falsiane: bool TRUE;
 
 long main()
   {
-  a = true;
+  a = 2;
   v#3.4 = 2;
   v#2 = v[10-1];
   for (i = 1 to 10)
@@ -37,8 +41,7 @@ long main()
   {};
   };
 
-long incn (long x, long n)
-  return x+n;
+
 
 short voidfunc() ;
   

@@ -96,10 +96,9 @@ chama_parametros
 		;
 
 */
-void checkParamPair(AST_NODE *declared, AST_NODE *called)
+void checkParamPair(AST_NODE *declared, AST_NODE *called, int funcLineNumber)
 {
 	int declaredDataType;
-
 	if (declared == NULL && called == NULL)
 		return;
 
@@ -107,7 +106,7 @@ void checkParamPair(AST_NODE *declared, AST_NODE *called)
 		semanticError("Numero de parametros errado!", called->lineNumber);
 
 	if (declared != NULL && called == NULL)
-		semanticError("Numero de parametros errado!", called->lineNumber);
+		semanticError("Numero de parametros errado!", funcLineNumber);
 
 	if (declared->type == AST_DEC_ARGS && called->type != AST_PARAM_LIST)
 	{
@@ -118,8 +117,8 @@ void checkParamPair(AST_NODE *declared, AST_NODE *called)
 
 	if (declared->type == AST_ARGS_LIST && called->type == AST_PARAM_LIST)
 	{
-		checkParamPair(declared->children[0], called->children[0]);
-		checkParamPair(declared->children[1], called->children[1]);
+		checkParamPair(declared->children[0], called->children[0], funcLineNumber);
+		checkParamPair(declared->children[1], called->children[1], funcLineNumber);
 		return;
 	}
 
@@ -183,7 +182,7 @@ int getExpressionDataType(AST_NODE *node)
 			checkIdentifierExists(node->symbol, node->lineNumber);
 			if (node->symbol->dataNature != NATURE_FUNC)
 				semanticError("O identificador nao eh uma funcao", node->lineNumber);
-			checkParamPair(node->symbol->funcParam, node->children[0]);
+			checkParamPair(node->symbol->funcParam, node->children[0], node->lineNumber);
 			return node->symbol->dataType;
 
 		case AST_LITERAL:
