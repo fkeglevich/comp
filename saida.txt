@@ -1,9 +1,13 @@
 v : long [ 4 ] 0 0 0 0 ;
 a2 : short  0 ;
-long  incn2 ( long  x , float  n ) return main();
+long  incn2 ( long  x , float  n ) return 2.2 ;
+short  eno ( ) {
+a2 = 2 ;
+};
 long  incn3 ( ) return main();
 long  incn ( long  x , long  n ) {
-a2 = incn3();
+a2 = eno();
+print "a didi ua"  "asdaaar" ;
 return a2 + n ;
 };
 long  main ( ) {

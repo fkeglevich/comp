@@ -277,9 +277,11 @@ void checkProgram(AST_NODE *node)
 			checkIdentifierExists(node->symbol, node->lineNumber);
 			break;
 		
-		//| KW_PRINT expressao lista_print			{$$ = ast_insert(AST_PRINT, NULL, $2, $3, NULL, NULL);}
-		//case AST_PRINT:
-			
+		//| KW_RETURN expressao 				{$$ = ast_insert(AST_RETURN, NULL, $2, NULL, NULL, NULL);}
+		case AST_RETURN:
+			if (compareDataTypes(getExpressionDataType(node->children[0]), DATATYPE_DOUBLE, node->lineNumber) == DATATYPE_UNKNOWN)
+				semanticError("Retorno incompativel!", node->lineNumber);
+			break;
 
 		default:
 			checkChildren(node);
