@@ -166,10 +166,14 @@ int getExpressionDataType(AST_NODE *node)
 
 		case AST_ID:
 			checkIdentifierExists(node->symbol, node->lineNumber);
+			if (node->symbol->dataNature != NATURE_VAR)
+				semanticError("O identificador nao eh uma variavel", node->lineNumber);
 			return node->symbol->dataType;
 
 		case AST_ID_VECTOR:
 			checkIdentifierExists(node->symbol, node->lineNumber);
+			if (node->symbol->dataNature != NATURE_VEC)
+				semanticError("O identificador nao eh um vetor", node->lineNumber);
 			if (compareDataTypes(getExpressionDataType(node->children[0]), DATATYPE_LONG, node->lineNumber) != DATATYPE_LONG)
 				semanticError("O indice do vetor precisa ser um inteiro!", node->lineNumber);
 			return node->symbol->dataType;
@@ -177,6 +181,8 @@ int getExpressionDataType(AST_NODE *node)
 		//| TK_IDENTIFIER '(' chama_parametros ')'	{$$ = ast_insert(AST_ID_CALL, $1, $3, NULL, NULL, NULL);}
 		case AST_ID_CALL:
 			checkIdentifierExists(node->symbol, node->lineNumber);
+			if (node->symbol->dataNature != NATURE_FUNC)
+				semanticError("O identificador nao eh uma funcao", node->lineNumber);
 			checkParamPair(node->symbol->funcParam, node->children[0]);
 			return node->symbol->dataType;
 

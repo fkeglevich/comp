@@ -2,7 +2,8 @@ Verificações chatas:
 
 (OK) Proibir a dupla verificacao
 
-Todxs os identificadores precisam estar declarados
+(OK) Todxs os identificadores precisam estar declarados
+	Nota: talvez precise verificar mais coisas nas funções, mas na dúvida VAMOS DEIXAR COMO ESTÁ E FODA-SSE
 variavel so pode ser usada SEM indexaão
 vetor so pode ser usado COM indexacao
 Funcoes so podem ser chamadas

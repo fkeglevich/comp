@@ -1,5 +1,5 @@
 a : short  0 ;
-a : long  1 ;
+a1 : long  1 ;
 i : long  0 ;
 v : long [ 10 ] 0 0 0 0 0 0 0 0 0 0 ;
 mat : long [ 10 ] ;
@@ -8,7 +8,7 @@ c : byte  'x' ;
 d : byte  65 ;
 falsiane : bool  TRUE ;
 long  main ( ) {
-a = 10 ;
+a = true ;
 v # 2 = v[10 - 1 ];
 for ( i = 1 to 10 ) print i  " " ;
 read hihiUpsy ;
