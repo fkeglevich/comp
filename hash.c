@@ -14,6 +14,7 @@ Grupo:
 #include "hash.h"
 #include "ast.h"
 #include "y.tab.h"
+#include "semantic.h"
 
 #ifdef DEBUG_MODE
 
@@ -119,4 +120,37 @@ void hash_print()
 		}
 	}
 }
+
+HASH_NODE *makeTempSimbol(void){
+	static char tempBuffer[256] = "";
+	static int nextTemp = 0;
+
+	HASH_NODE *new = 0;
+
+	sprintf(tempBuffer,"__TEMP__%d__", nextTemp);
+
+	++nextTemp;
+
+	new = hash_insert(SYMBOL_IDENTIFIER, tempBuffer);
+	new->type = SYMBOL_SCALAR;
+
+	return new;
+}
+
+HASH_NODE *makeLabel(void){
+	static char labelBuffer[256] = "";
+	static int nextLabel = 0;
+
+	HASH_NODE *new = 0;
+
+	sprintf(labelBuffer,"__LABEL__%d__", nextLabel);
+
+	++nextLabel;
+
+	new = hash_insert(SYMBOL_IDENTIFIER, labelBuffer);
+	new->type = SYMBOL_LABEL;
+
+	return new;
+}
+
 

@@ -38,6 +38,10 @@ const char* getTokenName(int code);
 #define DATATYPE_BOOL		6
 #define DATATYPE_STRING		7
 
+#define SYMBOL_SCALAR 		8
+#define SYMBOL_LABEL 		9
+
+
 typedef struct hash_node {
 	int type;
 	int dataNature;
@@ -54,5 +58,7 @@ int hash_code(char *text);
 HASH_NODE* hash_insert(int type, char *text);
 HASH_NODE* hash_search(char *text);
 void hash_print(void);
+HASH_NODE *makeTempSimbol(void); 	//TACS - etapa 5
+HASH_NODE *makeLabel(void); 		//TACS - etapa 5
 
 #endif
