@@ -13,9 +13,12 @@ Grupo:
 #include <stdlib.h>
 
 #include "semantic.h"
+#include "tac.h"
 
 int getLineNumber(void);
+
 extern int yylex();
+TAC *tac;
 
 %}  
 
@@ -86,7 +89,13 @@ extern int yylex();
 
 %%
 
-inicio: programa				{ast_print_tree($1); checkProgram($1); };
+inicio: programa		{ast_print_tree($1); checkProgram($1);
+						
+						printf("\n\tGerando TAC: three address code.....\n");
+						tac = tacCodeGen($1);
+						tacPrintList(tacReverse(tac));
+						printf("\n\tOk. TAC gerada com sucesso!\n");
+						};
 
 programa 
 		: declaracao programa	{$$ = ast_insert(AST_PROGRAM, NULL, $1, $2, NULL, NULL);}

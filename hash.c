@@ -121,7 +121,7 @@ void hash_print()
 	}
 }
 
-HASH_NODE *makeTempSimbol(void){
+HASH_NODE *makeTemp(void){
 	static char tempBuffer[256] = "";
 	static int nextTemp = 0;
 

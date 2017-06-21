@@ -12,6 +12,7 @@ Grupo:
 #include <stdio.h>
 #include "semantic.h"
 #include "y.tab.h"
+#include "tac.h"
 
 int running = 1;
 int contadorLinhas = 1;

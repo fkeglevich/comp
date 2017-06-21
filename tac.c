@@ -209,6 +209,26 @@ TAC* tacCodeGen(AST_NODE* root){
 }
 
 
+TAC* tacReverse(TAC *last){
+	TAC *first;
+	if (last == 0)
+		return 0;
+	
+	for (first = last; first->prev; first = first->prev) {
+			first->prev->next = first;
+    }
+
+	return first;
+}
+
+void tacPrintList(TAC* first){
+	TAC *tac;
+
+    for(tac = first; tac; tac = tac->next){
+		tacPrintSingle(tac);        
+    }
+}
+
 
 void tacPrintSingle(TAC* tac){
 
