@@ -58,7 +58,7 @@ int hash_code(char *text);
 HASH_NODE* hash_insert(int type, char *text);
 HASH_NODE* hash_search(char *text);
 void hash_print(void);
-HASH_NODE *makeTempSimbol(void); 	//TACS - etapa 5
+HASH_NODE *makeTemp(void); 	//TACS - etapa 5
 HASH_NODE *makeLabel(void); 		//TACS - etapa 5
 
 #endif

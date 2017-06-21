@@ -8,7 +8,7 @@
 #
 
 etapa5: y.tab.c lex.yy.c
-	gcc -o etapa5 lex.yy.c ast.c hash.c y.tab.c semantic.c #main.c chamada em scanner.l
+	gcc -o etapa5 lex.yy.c ast.c hash.c y.tab.c semantic.c tac.c
 	
 lex.yy.c: scanner.l
 	lex -d scanner.l
