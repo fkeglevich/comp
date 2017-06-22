@@ -33,6 +33,8 @@ const char* getTokenName(int code)
 		tokens[4] 	= "SYMBOL_LIT_STRING";
 		tokens[5] 	= "SYMBOL_LIT_TRUE  ";
 		tokens[6] 	= "SYMBOL_LIT_FALSE";
+		tokens[8] 	= "SYMBOL_SCALAR";
+		tokens[9] 	= "SYMBOL_LABEL";
 		tokenArrayInit = 1;
 	}
 
