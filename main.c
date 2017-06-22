@@ -18,7 +18,7 @@ extern FILE *outputTAC;
 int main (int argv, char **argc)
 {
 	int token;
-	if (argv < 4)
+	if (argv < 3)
 	{
 		printf("Arquivos nao informados!\n");
 		exit(1);
@@ -39,7 +39,7 @@ int main (int argv, char **argc)
 	}
 	OUT_FILE = out;
 
-	FILE* outTAC = fopen(argc[3], "w+");
+	FILE* outTAC = fopen("OUT_TAC", "w+");
 	if (!outTAC)
 	{
 		printf("Erro ao gerar arquivo de saida TAC!\n");
