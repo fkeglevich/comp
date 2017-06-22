@@ -38,8 +38,8 @@ Grupo:
 #define TAC_CHARACTER   12
 #define TAC_STRING 	    13
 
-#define TAC_INPUT       14
-#define TAC_OUTPUT      15
+#define TAC_READ       14
+#define TAC_PRINT     15
 #define TAC_RETURN      16
 
 #define TAC_LE 		    17
@@ -69,6 +69,8 @@ Grupo:
 #define TAC_PARAMETRO	39
 #define TAC_DEC_POINTER 40
 #define TAC_VAR_VET	    41
+
+#define TAC_LITERAL 	    42
 
 typedef struct tac_structure{
 	int type; //operaçao
