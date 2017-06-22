@@ -30,7 +30,11 @@ Grupo:
 #define TAC_MUL 	    3
 #define TAC_DIV 	    4
 
-#define TAC_DATAINT 	5 
+#define TAC_DATABYTE 	5 
+#define TAC_DATASHORT 	6 
+#define TAC_DATALONG 	43 
+#define TAC_DATAFLOAT 	44 
+#define TAC_DATADOUBLE 	45 
 #define TAC_DATABOOL 	7
 
 #define TAC_INTEGER     9 
@@ -49,7 +53,6 @@ Grupo:
 #define TAC_AND 	    21
 #define TAC_OR 		    22
 
-//#define TAC_IGUAL	    23
 #define TAC_MOV		    23
 #define TAC_MOV_VET	    24
 #define TAC_MAIOR	    25

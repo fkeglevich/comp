@@ -62,7 +62,7 @@ TAC* tacJoin ( TAC* l1, TAC* l2 ) { //junta duas listas de TACs
 
 TAC* tacCodeGen(AST_NODE* root){
 	int i;
-    int aux = 0;
+    	int aux = 0;
 	TAC *code[NUM_CHILDREN];
 	//TAC *result;
 	TAC *all;
@@ -74,23 +74,20 @@ TAC* tacCodeGen(AST_NODE* root){
 	HASH_NODE *endLabel;
 	
 	for( i=0; i<NUM_CHILDREN; i++ )
-		code[i] = 0;		
+		code[i] = NULL;		
    
-	if( root == 0 ) return 0;	
+	if( root == NULL ) return NULL;	
 
-	for( i=0; i < NUM_CHILDREN; i++) {
+	for( i=0; i < NUM_CHILDREN; i++)
+	{
 		if(root->children[i]) {
 			code[i] = tacCodeGen(root->children[i]);
-        }
-    }
+        	}
+    	}
 
 
     //printf("\n%d", root->type);
 	switch(root->type){
-		
-
-		//Flévio essa parte que precisa ser de acordo com a nossa AST :x
-
 		case AST_COMMAND_LIST:         return code[0];                                         break;
 		case AST_ADD:	        return makeBinOp(code[0],code[1], TAC_ADD);             break;
 		case AST_SUB:	        return makeBinOp(code[0],code[1], TAC_SUB);             break;			
@@ -105,18 +102,17 @@ TAC* tacCodeGen(AST_NODE* root){
 		case AST_GT:	    return makeBinOp(code[0],code[1], TAC_MAIOR);           break;
 		case AST_LT:	        return makeBinOp(code[0],code[1], TAC_MENOR);           break;
 
-		case AST_BYTE:	        return tacCreate(TAC_DATAINT, 0, 0, 0);                 break;
+		case AST_BYTE:	        return tacCreate(TAC_DATABYTE, 0, 0, 0);                 break;
+		case AST_SHORT:	        return tacCreate(TAC_DATASHORT, 0, 0, 0);                 break;
+		case AST_LONG:	        return tacCreate(TAC_DATALONG, 0, 0, 0);                 break;		
+		case AST_FLOAT:	        return tacCreate(TAC_DATAFLOAT, 0, 0, 0);                 break;		
+		case AST_DOUBLE:	return tacCreate(TAC_DATADOUBLE, 0, 0, 0);                 break;				
+
 		case AST_BOOL:	        return tacCreate(TAC_DATABOOL, 0, 0, 0);                break;
-		case AST_SHORT:	        return tacCreate(TAC_DATAINT, 0, 0, 0);                 break;
-		case AST_LONG:	        return tacCreate(TAC_DATAINT, 0, 0, 0);                 break;
-		/*case AST_LIT_INTEGER:	return tacCreate(TAC_INTEGER, root->symbol, 0, 0);      break;
-		case AST_LIT_TRUE:	    return tacCreate(TAC_BOOLEAN, root->symbol, 0, 0);      break;
-		case AST_LIT_FALSE:	    return tacCreate(TAC_BOOLEAN, root->symbol, 0, 0);      break;
-		case AST_LIT_CHAR:	    return tacCreate(TAC_CHARACTER, root->symbol, 0, 0);    break;
-		case AST_LIT_STRING:	return tacCreate(TAC_STRING, root->symbol, 0, 0);       break;*/
+
 		case AST_LITERAL:	    return tacCreate(TAC_LITERAL, root->symbol, 0, 0);    break;
 		case AST_READ:	        return tacCreate(TAC_READ, root->symbol, 0, 0 );       break;
-		case AST_ID:	    return tacCreate(TAC_VARIABLE, root->symbol, 0, 0);     break;            
+		case AST_ID:	    		return tacCreate(TAC_VARIABLE, root->symbol, 0, 0);     break;            
 
 		case AST_PARAM_LIST:         return tacJoin(code[0],tacCreate( TAC_PARAMETRO, root->symbol, code[0]? code[0]->target:0, 0 ));    break;
 		case AST_PRINT:	        return tacJoin(code[0],tacCreate(TAC_PRINT, code[0]? code[0]->target:0, 0, 0 ));   break;
@@ -235,7 +231,7 @@ void tacPrintList(TAC* first){
 void tacPrintSingle(TAC* tac){
 
     printf("TAC(");
-	fprintf(outputTAC,"\nTAC(");
+	fprintf(outputTAC,"TAC(");
 	switch(tac->type){
 		case TAC_ADD: 		
 			printf("TAC_ADD");
@@ -258,9 +254,30 @@ void tacPrintSingle(TAC* tac){
 		 	printf("TAC_LITERAL");
 			fprintf(outputTAC,"TAC_LITERAL");
 			break;
-		case TAC_DATAINT:
-		 	printf("TAC_DATAINT");
-			fprintf(outputTAC,"TAC_DATAINT");
+
+		case TAC_DATABYTE:
+		 	printf("TAC_DATABYTE");
+			fprintf(outputTAC,"TAC_DATABYTE");
+			break;
+
+		case TAC_DATASHORT:
+		 	printf("TAC_DATASHORT");
+			fprintf(outputTAC,"TAC_DATASHORT");
+			break;
+		
+		case TAC_DATALONG:
+		 	printf("TAC_DATALONG");
+			fprintf(outputTAC,"TAC_DATALONG");
+			break;
+
+		case TAC_DATAFLOAT:
+		 	printf("TAC_DATAFLOAT");
+			fprintf(outputTAC,"TAC_DATAFLOAT");
+			break;
+
+		case TAC_DATADOUBLE:
+		 	printf("TAC_DATADOUBLE");
+			fprintf(outputTAC,"TAC_DATADOUBLE");
 			break;
 
 		case TAC_DATABOOL:
@@ -369,7 +386,7 @@ void tacPrintSingle(TAC* tac){
 			printf("TAC_VARIABLE");
 			fprintf(outputTAC,"TAC_VARIABLE");
 			break;
-        case TAC_VAR_VET:
+        	case TAC_VAR_VET:
 			printf("TAC_VAR_VET");
 			fprintf(outputTAC,"TAC_VAR_VET");
 			break;
@@ -385,7 +402,7 @@ void tacPrintSingle(TAC* tac){
 		 	printf("TAC_DECLARE");
 			fprintf(outputTAC,"TAC_DECLARE");
 			break;
-        case TAC_DEC_POINTER:
+       	 	case TAC_DEC_POINTER:
 		 	printf("TAC_DEC_POINTER");
 			fprintf(outputTAC,"TAC_DEC_POINTER");
 			break;
@@ -412,27 +429,14 @@ void tacPrintSingle(TAC* tac){
 	 	printf(", %s ",tac->target->text);
 		fprintf(outputTAC,", %s ",tac->target->text);
 	}
-	/*else{
-	 	printf(",");
-		fprintf(outputTAC,",");
-	}*/
 	if(tac->op1){
 	 	printf(", %s ",tac->op1->text);
 		fprintf(outputTAC,", %s ",tac->op1->text);
 	}
-	/*else{
-	 	printf(",");
-		fprintf(outputTAC,",");
-	}*/
 	if(tac->op2){
 	 	printf(", %s ",tac->op2->text);
 		fprintf(outputTAC,", %s ",tac->op2->text);
 	}
-	/*else{
-	 	printf(",");
-		fprintf(outputTAC,",");
-	}*/
-	
 	printf(")\n");
 	fprintf(outputTAC,")\n");
 
