@@ -120,7 +120,12 @@ TAC* tacCodeGen(AST_NODE* root){
 
 		case AST_PROGRAM:       return tacJoin(code[0],code[1]);        break;
 		case AST_VAR_DEC:          return tacCreate( TAC_DECLARE, root->symbol, code[1]? code[1]->target:0, 0 );       break;              
-        case AST_VEC_DEC:     return tacCreate( TAC_DECLAREVET, root->symbol, code[1]? code[1]->target:0, 0 );    break; 
+        	case AST_VEC_DEC:     return tacCreate( TAC_DECLAREVET, root->symbol, code[1]? code[1]->target:0, 0 );    break; 
+		
+		case AST_ARGS_LIST:
+        		all = tacCreate(TAC_ARG, 0, code[0]->target, 0);
+			return tacJoin(tacJoin(code[0], all), , code[1]);
+			break;
 
 		case AST_ATRIB:
 		case AST_ATRIB_VECTOR:
