@@ -124,7 +124,7 @@ TAC* tacCodeGen(AST_NODE* root){
 		
 		case AST_ARGS_LIST:
         		all = tacCreate(TAC_ARG, 0, code[0]->target, 0);
-			return tacJoin(tacJoin(code[0], all), , code[1]);
+			return tacJoin(tacJoin(code[0], all), code[1]);
 			break;
 
 		case AST_ATRIB:
