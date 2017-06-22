@@ -18,9 +18,9 @@ extern FILE *outputTAC;
 int main (int argv, char **argc)
 {
 	int token;
-	if (argv < 3)
+	if (argv < 4)
 	{
-		printf("Arquivo nao informado!\n");
+		printf("Arquivos nao informados!\n");
 		exit(1);
 	}
 
