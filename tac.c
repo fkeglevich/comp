@@ -423,6 +423,10 @@ void tacPrintSingle(TAC* tac){
 			printf("TAC_PARAMETRO");
 			fprintf(outputTAC,"TAC_PARAMETRO");
 			break;
+		case TAC_ARG:
+			printf("TAC_ARG");
+			fprintf(outputTAC,"TAC_ARG");
+			break;		
 
 		default:
 	 		printf("UNKNOWN");
