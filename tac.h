@@ -74,6 +74,7 @@ Grupo:
 #define TAC_VAR_VET	    41
 
 #define TAC_LITERAL 	    42
+#define TAC_ARG 	    46
 
 typedef struct tac_structure{
 	int type; //operaçao
