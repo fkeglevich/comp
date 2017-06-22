@@ -133,8 +133,8 @@ HASH_NODE *makeTemp(void){
 
 	++nextTemp;
 
-	new = hash_insert(SYMBOL_IDENTIFIER, tempBuffer);
-	new->type = SYMBOL_SCALAR;
+	new = hash_insert(SYMBOL_SCALAR, tempBuffer);
+	//new->type = SYMBOL_SCALAR;
 
 	return new;
 }
@@ -144,13 +144,13 @@ HASH_NODE *makeLabel(void){
 	static int nextLabel = 0;
 
 	HASH_NODE *new = 0;
-
+	
 	sprintf(labelBuffer,"__LABEL__%d__", nextLabel);
 
 	++nextLabel;
 
-	new = hash_insert(SYMBOL_IDENTIFIER, labelBuffer);
-	new->type = SYMBOL_LABEL;
+	new = hash_insert(SYMBOL_LABEL, labelBuffer);
+	//new->type = SYMBOL_LABEL;
 
 	return new;
 }
