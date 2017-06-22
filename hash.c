@@ -134,7 +134,6 @@ HASH_NODE *makeTemp(void){
 	++nextTemp;
 
 	new = hash_insert(SYMBOL_SCALAR, tempBuffer);
-	//new->type = SYMBOL_SCALAR;
 
 	return new;
 }
@@ -150,9 +149,5 @@ HASH_NODE *makeLabel(void){
 	++nextLabel;
 
 	new = hash_insert(SYMBOL_LABEL, labelBuffer);
-	//new->type = SYMBOL_LABEL;
-
 	return new;
 }
-
-

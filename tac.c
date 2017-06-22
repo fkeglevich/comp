@@ -253,7 +253,11 @@ void tacPrintSingle(TAC* tac){
 	 		printf("TAC_DIV");
 			fprintf(outputTAC,"TAC_DIV");
 			break;
-
+		
+		case TAC_LITERAL:
+		 	printf("TAC_LITERAL");
+			fprintf(outputTAC,"TAC_LITERAL");
+			break;
 		case TAC_DATAINT:
 		 	printf("TAC_DATAINT");
 			fprintf(outputTAC,"TAC_DATAINT");

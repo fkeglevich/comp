@@ -1,0 +1,8 @@
+a: long 1;
+b: long 0;
+
+long main()
+{
+	when (a > b) then 
+		print "Parou no meio\n";
+};
