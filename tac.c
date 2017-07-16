@@ -37,13 +37,12 @@ TAC* makeVec(HASH_NODE* identifier, HASH_NODE* length, TAC** code);
 TAC* makeVecExpr(HASH_NODE* identifier, TAC** code);
 
 
-// implementation
-
+//tacArg = tacCreate(TAC_ID_CALL, 0, tacBuff->res,func_name, i);
 TAC* tacCreate(int type, HASH_NODE *res, HASH_NODE *op1, HASH_NODE *op2, int posicaoParam){
 	TAC* newTac;
 
 	if(!(newTac = (TAC*) calloc(1, sizeof(TAC))) ){
-		fprintf(stderr, "Error creating TAC! \n");
+		fprintf(stderr, "Erro ao criar TAC! \n");
 		exit(1);
 	}
 	newTac->type = type;
@@ -222,6 +221,7 @@ TAC * tacGenerate(AST_NODE *node){
 		case AST_ATRIB: result = makeAtrib(node->symbol,code); break;
 		case AST_ATRIB_VECTOR: result = makeAtribVec(node->symbol,code); break;
 		// case AST_DEC_FUNC: result = makeFuncDef(node->children[0]->symbol, code, node); break;
+		
 		case AST_ID_CALL: result = makeIdCall(node); break;
 		case AST_RETURN: result = makeReturn(code); break;
 		case AST_READ: result = makeRead(node->symbol); break;
@@ -351,12 +351,14 @@ TAC* makeIdCall(AST_NODE *callFunc){
 	int i = 1;
 	HASH_NODE* func_name = callFunc->symbol;
 	for(buffer = callFunc->children[0]; buffer; buffer = buffer->children[1]){
-		tacBuff = tacGenerate(buffer->children[0]);
+		if (buffer->children[0] != NULL)
+			tacBuff = tacGenerate(buffer->children[0]);
+		else
+			tacBuff = tacGenerate(buffer);
 		tacArg = tacCreate(TAC_ID_CALL, 0, tacBuff->res,func_name, i);
 		parametros = tacJoin(tacJoin(parametros,tacBuff),tacArg);
 		i++;
 	}
-
 	HASH_NODE* callTemp = makeTemp();
 	callTac = tacCreate(TAC_CALL, callTemp, callFunc->symbol,0,0);
 	return tacJoin(parametros,callTac);
