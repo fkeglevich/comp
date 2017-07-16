@@ -122,32 +122,3 @@ void hash_print()
 		}
 	}
 }
-
-HASH_NODE *makeTemp(void){
-	static char tempBuffer[256] = "";
-	static int nextTemp = 0;
-
-	HASH_NODE *new = 0;
-
-	sprintf(tempBuffer,"__TEMP__%d__", nextTemp);
-
-	++nextTemp;
-
-	new = hash_insert(SYMBOL_SCALAR, tempBuffer);
-
-	return new;
-}
-
-HASH_NODE *makeLabel(void){
-	static char labelBuffer[256] = "";
-	static int nextLabel = 0;
-
-	HASH_NODE *new = 0;
-	
-	sprintf(labelBuffer,"__LABEL__%d__", nextLabel);
-
-	++nextLabel;
-
-	new = hash_insert(SYMBOL_LABEL, labelBuffer);
-	return new;
-}

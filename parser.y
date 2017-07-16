@@ -89,7 +89,10 @@ TAC *tac;
 
 %%
 
-inicio: programa		{ast_print_tree($1); checkProgram($1);};
+inicio: programa		{ast_print_tree($1); checkProgram($1);
+ 							fprintf(stderr,"--**-- TACS --**--\n");
+							tacPrintForward(tacReverse(tacGenerate($1)));
+						};
 
 programa 
 		: declaracao programa	{$$ = ast_insert(AST_PROGRAM, NULL, $1, $2, NULL, NULL);}

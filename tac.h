@@ -14,37 +14,37 @@ Grupo:
 #include "hash.h"
 #include "ast.h"
 
-#define TAC_LITERAL 	1 
-#define TAC_ADD    		2
-#define TAC_SUB    		3
-#define TAC_MUL    		4
-#define TAC_DIV    		5
-#define TAC_GT 	   		6
-#define TAC_LT 	   		7
-#define TAC_LE	   		8
-#define TAC_GE     		9
-#define TAC_EQ 	   		10
-#define TAC_NE	   		11
-#define TAC_RETURN		20 
-#define TAC_IFZ			28
+#define TAC_LITERAL 	1  //ok
+#define TAC_ADD    		2  //ok
+#define TAC_SUB    		3  //ok
+#define TAC_MUL    		4  //ok
+#define TAC_DIV    		5  //ok
+#define TAC_GT 	   		6  //ok
+#define TAC_LT 	   		7  //ok
+#define TAC_LE	   		8  //ok
+#define TAC_GE     		9  //ok
+#define TAC_EQ 	   		10 //ok
+#define TAC_NE	   		11 //ok
+#define TAC_RETURN		20 //ok
+#define TAC_IFZ			28 //ok
 #define TAC_LABEL		29
-#define TAC_JUMP		30
+#define TAC_JUMP		30 //ok
 #define TAC_IFLESSEQ	31
-#define TAC_INC			32
-#define TAC_MOVE		33
+#define TAC_INC			32 //ok
+#define TAC_MOVE		33 //ok
 #define TAC_BEGIN_FUNC 	34
 #define TAC_END_FUNC 	36
-#define TAC_VAR 		24
+#define TAC_VAR 		24 //ok
 #define TAC_VEC_WRITE	18
-#define TAC_ATRIB		17
+#define TAC_ATRIB		17 //ok
 #define TAC_ID_VECTOR	19
 #define TAC_ARRAY_VALUE 23
 #define TAC_VEC 		25
 #define TAC_PRINT		21
-#define TAC_AND	   		12
-#define TAC_OR	   		13
+#define TAC_AND	   		12 //ok
+#define TAC_OR	   		13 //ok
 #define TAC_CALL		26
-#define TAC_ARG_CALL	27
+#define TAC_ID_CALL		27 //ok
 #define TAC_ARG_RECEIVE 35
 
 #define TAC_NOT	   		14
@@ -53,7 +53,7 @@ Grupo:
 typedef struct tac_structure{
 	int type; //operaçao
 	int posicaoParam;
-	HASH_NODE *target;
+	HASH_NODE *res;
 	HASH_NODE *op1;
 	HASH_NODE *op2;
 	
@@ -69,4 +69,4 @@ TAC* tacJoin(TAC *l1 ,TAC *l2);
 void tacPrintBack(TAC *last);
 void tacPrintForward(TAC *first);
 TAC* tacReverse(TAC* tac);
-TAC * tacGenerate(ASTREE *node);
+TAC * tacGenerate(AST_NODE *node);

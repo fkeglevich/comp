@@ -41,10 +41,6 @@ int main (int argv, char **argc)
 	initMe();
 	yyparse();
 	hash_print();
-
-	fprintf(stderr,"--**-- TACS --**--\n");
-	tacPrintForward(tacReverse(tacGenerate(ast)));
-
 	fclose(out);
 	//printf("Programa reconhecido com sucesso!\n");
 	exit(0);
