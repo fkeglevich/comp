@@ -15,438 +15,422 @@ Grupo:
 #include "y.tab.h"
 
 
-FILE *outputTAC;
+// local functions
+HASH_NODE* makeTemp();
+HASH_NODE* makeLabel();
+void printTacType(int type);
+TAC* makeOpBin(int op, TAC** code);
+TAC* makeWhen(TAC** code);
+TAC* makeElse(TAC** code);
+TAC* makeWhile(TAC** code);
+TAC* makeFor(HASH_NODE* identifier, TAC** code);
+TAC* makeAtrib(HASH_NODE* identifier, TAC** code);
+TAC* makeAtribVec(HASH_NODE* identifier, TAC** code);
+TAC* makeFuncDef(HASH_NODE* identifier, TAC** code, ASTREE *funcDef);
+TAC* makeIdCall(ASTREE *funcCall);
+TAC* makeReturn(TAC** code);
+TAC* makeRead(HASH_NODE* identifier);
+TAC* makePrint(ASTREE* print, TAC** code);
+TAC* makeVecValues(HASH_NODE* identifier, TAC** code);
+TAC* makeVariavel(HASH_NODE* identifier, TAC** code);
+TAC* makeVec(HASH_NODE* identifier, HASH_NODE* length, TAC** code);
+TAC* makeVecExpr(HASH_NODE* identifier, TAC** code);
 
-TAC* tacCreate (int type, HASH_NODE *target, HASH_NODE *op1, HASH_NODE *op2) {
-	TAC* tac;
-	tac = (TAC*) calloc(1,sizeof(TAC));
-	tac->type = type;
-	tac->target = target;
-	tac->op1 = op1;
-	tac->op2 = op2;
-	tac->prev = 0;
-	tac->next = 0;
-    tacPrintSingle(tac);
 
-	return tac;
+// implementation
+
+TAC* tacCreate(int type, HASH_NODE *res, HASH_NODE *op1, HASH_NODE *op2, int posicaoParam){
+	TAC* newTac;
+
+	if(!(newTac = (TAC*) calloc(1, sizeof(TAC))) ){
+		fprintf(stderr, "Error creating TAC! \n");
+		exit(1);
+	}
+	newTac->type = type;
+	newTac->res = res;
+	newTac->op1 = op1;
+	newTac->op2 = op2;
+	newTac->prev = 0;
+	newTac->next = 0;
+	newTac->posicaoParam = posicaoParam;
+
+	return newTac;
 }
 
-TAC* makeBinOp(TAC *code0, TAC *code1, int type) {
-	TAC *result;
-	TAC *newTac;
-	result = tacJoin(code0, code1);
-
-	newTac = tacCreate(type, makeTemp(), code0?code0->target:0,code1?code1->target:0);
-	newTac->prev = result;
-	result = newTac;
-    tacPrintSingle(result);
-	return result;
-}
-
-//Profe deu em aula
-TAC* tacJoin ( TAC* l1, TAC* l2 ) { //junta duas listas de TACs
-	TAC* tac;
-	//se uma delas eh nula, retorna a outra.
-	if(!l1) return l2;
-	if(!l2) return l1;
+TAC* tacJoin(TAC *l1 ,TAC *l2){
+	TAC *tac;
 	
-	//percorre toda lista 2 de baixo pra cima.
-	for(tac = l2; tac->prev; tac = tac->prev);
-	
+	if(!l1) { return l2; }	
+	if(!l2) { return l1; }
+	for(tac = l2; tac->prev; tac=tac->prev){
+		; // go to root
+	}
 	tac->prev = l1;
-
-    tacPrintSingle(l2);
-
+	l1->next = tac;
 	return l2;
 }
 
-TAC* tacCodeGen(AST_NODE* root){
-	int i;
-    	int aux = 0;
-	TAC *code[NUM_CHILDREN];
-	//TAC *result;
-	TAC *all;
-	TAC *label;
-	//TAC *end;
-	//TAC *begin;
-	TAC *tcJump;
-	HASH_NODE *beginLabel;
-	HASH_NODE *endLabel;
-	
-	for( i=0; i<NUM_CHILDREN; i++ )
-		code[i] = NULL;		
-   
-	if( root == NULL ) return NULL;	
-
-	for( i=0; i < NUM_CHILDREN; i++)
-	{
-		if(root->children[i]) {
-			code[i] = tacCodeGen(root->children[i]);
-        	}
-    	}
-
-
-    //printf("\n%d", root->type);
-	switch(root->type){
-		case AST_COMMAND_LIST:         return code[0];                                         break;
-		case AST_ADD:	        return makeBinOp(code[0],code[1], TAC_ADD);             break;
-		case AST_SUB:	        return makeBinOp(code[0],code[1], TAC_SUB);             break;			
-		case AST_MUL:	        return makeBinOp(code[0],code[1], TAC_MUL);             break;		
-		case AST_DIV:	        return makeBinOp(code[0],code[1], TAC_DIV);             break;
-		case AST_LE:	        return makeBinOp(code[0],code[1], TAC_LE);              break;
-		case AST_GE:	        return makeBinOp(code[0],code[1], TAC_GE);              break;
-		case AST_EQ:	        return makeBinOp(code[0],code[1], TAC_EQ);              break;
-		case AST_NE:	        return makeBinOp(code[0],code[1], TAC_NE);              break;
-		case AST_AND:	        return makeBinOp(code[0],code[1], TAC_AND);             break;
-		case AST_OR:	        return makeBinOp(code[0],code[1], TAC_OR);              break;
-		case AST_GT:	    return makeBinOp(code[0],code[1], TAC_MAIOR);           break;
-		case AST_LT:	        return makeBinOp(code[0],code[1], TAC_MENOR);           break;
-
-		case AST_BYTE:	        return tacCreate(TAC_DATABYTE, 0, 0, 0);                 break;
-		case AST_SHORT:	        return tacCreate(TAC_DATASHORT, 0, 0, 0);                 break;
-		case AST_LONG:	        return tacCreate(TAC_DATALONG, 0, 0, 0);                 break;		
-		case AST_FLOAT:	        return tacCreate(TAC_DATAFLOAT, 0, 0, 0);                 break;		
-		case AST_DOUBLE:	return tacCreate(TAC_DATADOUBLE, 0, 0, 0);                 break;				
-
-		case AST_BOOL:	        return tacCreate(TAC_DATABOOL, 0, 0, 0);                break;
-
-		case AST_LITERAL:	    return tacCreate(TAC_LITERAL, root->symbol, 0, 0);    break;
-		case AST_READ:	        return tacCreate(TAC_READ, root->symbol, 0, 0 );       break;
-		case AST_ID:	    		return tacCreate(TAC_VARIABLE, root->symbol, 0, 0);     break;            
-
-		case AST_PARAM_LIST:         return tacJoin(code[0],tacCreate( TAC_PARAMETRO, root->symbol, code[0]? code[0]->target:0, 0 ));    break;
-		case AST_PRINT:	        return tacJoin(code[0],tacCreate(TAC_PRINT, code[0]? code[0]->target:0, 0, 0 ));   break;
-		case AST_RETURN:	    return tacJoin(code[0],tacCreate(TAC_RETURN, code[0]? code[0]->target:0, 0, 0 ));   break;
-
-		case AST_PROGRAM:       return tacJoin(code[0],code[1]);        break;
-		case AST_VAR_DEC:          return tacCreate( TAC_DECLARE, root->symbol, code[1]? code[1]->target:0, 0 );       break;              
-        	case AST_VEC_DEC:     return tacCreate( TAC_DECLAREVET, root->symbol, code[1]? code[1]->target:0, 0 );    break; 
-		
-		case AST_ARGS_LIST:
-        		all = tacCreate(TAC_ARG, 0, code[0]->target, 0);
-			return tacJoin(tacJoin(code[0], all), code[1]);
-			break;
-
-		case AST_ATRIB:
-		case AST_ATRIB_VECTOR:
-			if(root->children[0]->type == AST_ID){
-                aux = 0;
-                if(code[1]){
-                    if (code[1]->target->type == AST_ID_VECTOR){
-                        aux = 1;
-                    }
-                }
-                
-                if(aux == 1){
-                    all = tacCreate( TAC_MOV, code[0]? code[0]->target:0, code[1]? code[1]->target:0, code[1]? code[1]->op1:0 );
-                }
-                else{
-                    all = tacCreate( TAC_MOV, code[0]? code[0]->target:0, code[1]? code[1]->target:0, 0 );
-                }
-                
-				all = tacJoin(code[0],all);
-                all = tacJoin(code[1],all);
-			}
-			else{   
-				all = tacCreate( TAC_MOV_VET, code[0]? code[0]->target:0, code[0]? code[0]->op1:0, code[1]? code[1]->target:0 );
-				label = tacJoin(code[0],code[1]);
-				all = tacJoin(label,all);
-			}
-            return all;
-            break;
-            
-
-		case AST_WHEN:
-			beginLabel = makeLabel();			
-			all = tacCreate(TAC_JFALSE, beginLabel, 0, 0);		
-			all = tacJoin(code[0], all);
-			all = tacJoin(all, code[1]);
-			label = tacCreate(TAC_LABEL, beginLabel, 0, 0);
-			all = tacJoin(all, label);			
-			return all;
-            break;   
-
-		case AST_WHEN_ELSE:
-			beginLabel = makeLabel();
-			endLabel = makeLabel();
-			all = tacCreate(TAC_JFALSE, beginLabel, 0, 0);
-			label = tacCreate(TAC_LABEL, beginLabel, 0, 0);
-			tcJump = tacCreate(TAC_JUMP, endLabel, 0, 0);
-			all = tacJoin(code[0], all);
-			all = tacJoin(all, code[1]);
-			all = tacJoin(all, tcJump);
-			all = tacJoin(all, label);
-			all = tacJoin(all,code[2]);
-			label = tacCreate(TAC_LABEL, endLabel, 0, 0);
-			all = tacJoin(all,label);
-			return all;
-            break;
-		case AST_WHILE:
-			beginLabel = makeLabel();
-			endLabel = makeLabel();			
-			tcJump = tacCreate(TAC_JUMP, beginLabel, 0, 0);
-			all = tacCreate( TAC_JFALSE, endLabel, code[0]? code[0]->target:0, 0 );
-			label = tacCreate(TAC_LABEL, endLabel, 0, 0);
-			tcJump = tacJoin(tcJump, label);
-			tcJump = tacJoin(label, code[1]);
-			label = tacCreate(TAC_LABEL, beginLabel, 0, 0);
-			label = tacJoin(tcJump, label);
-			label = tacJoin(label, code[0]);
-			all = tacJoin(label, all);		
-			return all;
-            break;
-       
-		case AST_FUNC_DEC:
-			label = tacCreate(TAC_ENDFUN, root->symbol, 0, 0);
-			all = tacCreate(TAC_BEGINFUN, root->symbol, 0, 0);
-			label = tacJoin(code[0],label);
-			label = tacJoin(code[1],label);
-			label = tacJoin(code[2], label);
-			label = tacJoin(code[3], label);
-			all = tacJoin(all,label);
-			return all;
-            break;
-		default:    break;
-	}
-	return 0;
+TAC* tacReverse(TAC *tac){	
+	TAC *t = 0;
+	for(t=tac;t->prev;t=t->prev){t->prev->next = t;}
+	return t;
 }
 
-
-TAC* tacReverse(TAC *last){
-	TAC *first;
-	if (last == 0)
-		return 0;
-	
-	for (first = last; first->prev; first = first->prev) {
-			first->prev->next = first;
-    }
-
-	return first;
-}
-
-void tacPrintList(TAC* first){
+void tacPrintBack(TAC *last){
 	TAC *tac;
+	for(tac = last; tac; tac=tac->prev){
+		if (tac->type != TAC_LITERAL){
+			fprintf(stderr, "TAC(");
+			printTacType(tac->type);
 
-    for(tac = first; tac; tac = tac->next){
-		tacPrintSingle(tac);        
-    }
+			if(tac->res){ 
+				fprintf(stderr, ",%s", tac->res->text); 
+			}else if(tac->posicaoParam && tac->type == TAC_ARG_CALL){
+				fprintf(stderr, ",arg%d", tac->posicaoParam); 
+			}else{ 
+				fprintf(stderr, ",");
+			}
+
+			if(tac->op1){ 
+				fprintf(stderr, ",%s", tac->op1->text); 
+			}else if(tac->posicaoParam && tac->type == TAC_ARG_RECEIVE){
+				fprintf(stderr, ",arg%d", tac->posicaoParam); 
+			}else{
+				fprintf(stderr, ",");
+			}
+
+			if(tac->op2){ 
+				fprintf(stderr, ",%s", tac->op2->text); 
+			}else{ 
+				fprintf(stderr, ",");
+			}
+
+			fprintf(stderr, ")\n");
+		}
+	}
 }
 
+void tacPrintForward(TAC *first){
+	TAC *tac;
+	for(tac = first; tac; tac=tac->next){
+		if (tac->type != TAC_LITERAL){
+			fprintf(stderr, "TAC(");
+			printTacType(tac->type);
 
-void tacPrintSingle(TAC* tac){
+			if(tac->res){ 
+				fprintf(stderr, ",%s", tac->res->text); 
+			}else if(tac->posicaoParam && tac->type == TAC_ARG_CALL){
+				fprintf(stderr, ",arg%d", tac->posicaoParam); 
+			}else{ 
+				fprintf(stderr, ",");
+			}
 
-    printf("TAC(");
-	fprintf(outputTAC,"TAC(");
-	switch(tac->type){
-		case TAC_ADD: 		
-			printf("TAC_ADD");
-			fprintf(outputTAC,"TAC_ADD");
-			break;
-		case TAC_SUB:
-			printf("TAC_SUB");
-			fprintf(outputTAC,"TAC_SUB");
-			break;
-		case TAC_MUL:
-	 		printf("TAC_MUL");
-			fprintf(outputTAC,"TAC_MUL");
-			break;
-		case TAC_DIV:
-	 		printf("TAC_DIV");
-			fprintf(outputTAC,"TAC_DIV");
-			break;
-		
-		case TAC_LITERAL:
-		 	printf("TAC_LITERAL");
-			fprintf(outputTAC,"TAC_LITERAL");
-			break;
+			if(tac->op1){ 
+				fprintf(stderr, ",%s", tac->op1->text); 
+			}else if(tac->posicaoParam && tac->type == TAC_ARG_RECEIVE){
+				fprintf(stderr, ",arg%d", tac->posicaoParam); 
+			}else{
+				fprintf(stderr, ",");
+			}
 
-		case TAC_DATABYTE:
-		 	printf("TAC_DATABYTE");
-			fprintf(outputTAC,"TAC_DATABYTE");
-			break;
+			if(tac->op2){ 
+				fprintf(stderr, ",%s", tac->op2->text); 
+			}else{ 
+				fprintf(stderr, ",");
+			}
 
-		case TAC_DATASHORT:
-		 	printf("TAC_DATASHORT");
-			fprintf(outputTAC,"TAC_DATASHORT");
-			break;
-		
-		case TAC_DATALONG:
-		 	printf("TAC_DATALONG");
-			fprintf(outputTAC,"TAC_DATALONG");
-			break;
-
-		case TAC_DATAFLOAT:
-		 	printf("TAC_DATAFLOAT");
-			fprintf(outputTAC,"TAC_DATAFLOAT");
-			break;
-
-		case TAC_DATADOUBLE:
-		 	printf("TAC_DATADOUBLE");
-			fprintf(outputTAC,"TAC_DATADOUBLE");
-			break;
-
-		case TAC_DATABOOL:
-		 	printf("TAC_DATABOOL");
-			fprintf(outputTAC,"TAC_DATABOOL");
-			break;
-
-		case TAC_INTEGER:
-		     	printf("TAC_INTEGER");
-			fprintf(outputTAC,"TAC_INTEGER");
-			break;
+			fprintf(stderr, ")\n");
+		}
+	}
 	
-		case TAC_BOOLEAN:
-		     	printf("TAC_BOOLEAN");
-			fprintf(outputTAC,"TAC_BOOLEAN");
-			break;
-		case TAC_CHARACTER:
-		   	printf("TAC_CHARACTER");
-			fprintf(outputTAC,"TAC_CHARACTER");
-			break;
-		case TAC_STRING:
-		 	printf("TAC_STRING");
-			fprintf(outputTAC,"TAC_STRING");
-			break;
+}
 
-		case TAC_READ:
-		       	printf("TAC_READ");
-			fprintf(outputTAC,"TAC_READ");
-			break;
-		case TAC_PRINT:
-		      	printf("TAC_PRINT");
-			fprintf(outputTAC,"TAC_PRINT");
-			break;
-		case TAC_RETURN:
-		      	printf("TAC_RETURN");
-			fprintf(outputTAC,"TAC_RETURN");
-			break;
-
-		case TAC_LE:
-	 		printf("TAC_LE");
-			fprintf(outputTAC,"TAC_LE");
-			break;
-		case TAC_GE:
-	 		printf("TAC_GE");
-			fprintf(outputTAC,"TAC_GE");
-			break;
-		case TAC_EQ:
-	 		printf("TAC_EQ");
-			fprintf(outputTAC,"TAC_EQ");
-			break;
-		case TAC_NE:
-	 		printf("TAC_NE");
-			fprintf(outputTAC,"TAC_NE");
-			break;
-		case TAC_AND:
-	 		printf("TAC_AND");
-			fprintf(outputTAC,"TAC_AND");
-			break;
-		case TAC_OR:
-	 		printf("TAC_OR");
-			fprintf(outputTAC,"TAC_OR");
-			break;
-
-		case TAC_MOV:
-			printf("TAC_MOV");
-			fprintf(outputTAC,"TAC_MOV");
-			break;
-		case TAC_MOV_VET:
-			printf("TAC_MOV_VET");
-			fprintf(outputTAC,"TAC_MOV_VET");
-			break;
-		case TAC_MAIOR:
-			printf("TAC_MAIOR");
-			fprintf(outputTAC,"TAC_MAIOR");
-			break;
-		case TAC_MENOR:
-		   	printf("TAC_MENOR");
-			fprintf(outputTAC,"TAC_MENOR");
-			break;
-
-		case TAC_LABEL:
-			printf("TAC_LABEL");
-			fprintf(outputTAC,"TAC_LABEL");
-			break;
-		case TAC_BEGINFUN:
-			printf("TAC_BEGINFUN");
-			fprintf(outputTAC,"TAC_BEGINFUN");
-			break;
-		case TAC_ENDFUN:
-			printf("TAC_ENDFUN");
-			fprintf(outputTAC,"TAC_ENDFUN");
-			break;
-		case TAC_CALL:
-			printf("TAC_CALL");
-			fprintf(outputTAC,"TAC_CALL");
-			break;
-		case TAC_JUMP:
-			printf("TAC_JUMP");
-			fprintf(outputTAC,"TAC_JUMP");
-			break;
-		case TAC_VETOR:
-			printf("TAC_VETOR");
-			fprintf(outputTAC,"TAC_VETOR");
-			break;
-		case TAC_VARIABLE:
-			printf("TAC_VARIABLE");
-			fprintf(outputTAC,"TAC_VARIABLE");
-			break;
-        	case TAC_VAR_VET:
-			printf("TAC_VAR_VET");
-			fprintf(outputTAC,"TAC_VAR_VET");
-			break;
-		case TAC_JFALSE:
-			printf("TAC_JFALSE");
-			fprintf(outputTAC,"TAC_JFALSE");
-			break;
-		case TAC_SALTO:
-			printf("TAC_SALTO");
-			fprintf(outputTAC,"TAC_SALTO");
-			break;
-		case TAC_DECLARE:
-		 	printf("TAC_DECLARE");
-			fprintf(outputTAC,"TAC_DECLARE");
-			break;
-       	 	case TAC_DEC_POINTER:
-		 	printf("TAC_DEC_POINTER");
-			fprintf(outputTAC,"TAC_DEC_POINTER");
-			break;
-		case TAC_DECLAREVET:
-			printf("TAC_DECLAREVET");
-			fprintf(outputTAC,"TAC_DECLAREVET");
-			break;
-		case TAC_LISTAPARAM:
-			printf("TAC_LISTAPARAM");
-			fprintf(outputTAC,"TAC_LISTAPARAM");
-			break;
-		case TAC_PARAMETRO:
-			printf("TAC_PARAMETRO");
-			fprintf(outputTAC,"TAC_PARAMETRO");
-			break;
-		case TAC_ARG:
-			printf("TAC_ARG");
-			fprintf(outputTAC,"TAC_ARG");
-			break;		
-
+void printTacType(int type){
+	switch(type){
+		case TAC_LITERAL: fprintf(stderr, "TAC_LITERAL"); break;
+		case TAC_ADD: fprintf(stderr, "TAC_ADD"); break;
+		case TAC_SUB: fprintf(stderr, "TAC_SUB"); break;
+		case TAC_MUL: fprintf(stderr, "TAC_MUL"); break;
+		case TAC_DIV: fprintf(stderr, "TAC_DIV"); break;
+		case TAC_GT: fprintf(stderr, "TAC_GT"); break;
+		case TAC_LT: fprintf(stderr, "TAC_LT"); break;
+		case TAC_LE: fprintf(stderr, "TAC_LE"); break;
+		case TAC_GE: fprintf(stderr, "TAC_GE"); break;
+		case TAC_EQ: fprintf(stderr, "TAC_EQ"); break;
+		case TAC_NE: fprintf(stderr, "TAC_NE"); break;
+		case TAC_AND: fprintf(stderr, "TAC_AND"); break;
+		case TAC_OR: fprintf(stderr, "TAC_OR"); break;
+		case TAC_ATRIB: fprintf(stderr, "TAC_ATRIB"); break;
+		case TAC_VEC_WRITE: fprintf(stderr, "TAC_VEC_WRITE"); break; //??
+		case TAC_VEC_READ: fprintf(stderr, "TAC_VEC_READ"); break; //??
+		case TAC_RETURN: fprintf(stderr, "TAC_RETURN"); break;
+		// case TAC_PRINT: fprintf(stderr, "TAC_PRINT"); break;
+		case TAC_READ: fprintf(stderr, "TAC_READ"); break;
+		// case TAC_CALL: fprintf(stderr, "TAC_CALL"); break;
+		// case TAC_ARG_CALL: fprintf(stderr, "TAC_ARG_CALL"); break;
+		// case TAC_ARG_RECEIVE: fprintf(stderr, "TAC_ARG_RECEIVE"); break;
+		// case TAC_IFZ: fprintf(stderr, "TAC_IFZ"); break;
+		// case TAC_LABEL: fprintf(stderr, "TAC_LABEL"); break;
+		// case TAC_BEGIN_FUNC: fprintf(stderr, "TAC_BEGIN_FUNC"); break;
+		// case TAC_END_FUNC: fprintf(stderr, "TAC_END_FUNC"); break;
+		// case TAC_JUMP: fprintf(stderr, "TAC_JUMP"); break;
+		// case TAC_IFLESSEQ: fprintf(stderr, "TAC_IFLESSEQ"); break;
+		// case TAC_INC: fprintf(stderr, "TAC_INC"); break;
+		// case TAC_MOVE: fprintf(stderr, "TAC_MOVE"); break;
+		// case TAC_ARRAY_VALUE: fprintf(stderr, "TAC_ARRAY_VALUE"); break;
+		// case TAC_VAR: fprintf(stderr, "TAC_VAR"); break;
+		// case TAC_VEC: fprintf(stderr, "TAC_VEC"); break;
 		default:
-	 		printf("UNKNOWN");
-			fprintf(outputTAC,"UNKNOWN");
-			break;
+			fprintf(stderr, "Type not found"); break;
+	}
+}
+
+TAC * tacGenerate(ASTREE *node){
+	TAC *code[MAX_SONS];
+	TAC *result = 0;
+	int i = 0;
+
+	if(!node) { return 0; }
+	for(i=0; i<MAX_SONS; i++){
+		code[i]= 0;
+	}
+	for(i=0; i<MAX_SONS; i++){
+		code[i]= tacGenerate(node->son[i]);
+	}
+	switch(node->type){
+		case AST_LITERAL: 
+		case AST_DEC_ARGS:
+			result = tacCreate(TAC_LITERAL, node->symbol, 0, 0, 0); break;
+		case AST_ID_VECTOR: result = makeVecExpr(node->symbol,code); break;
+		case AST_ADD: result = makeOpBin(TAC_ADD, code); break;	
+		case AST_SUB: result = makeOpBin(TAC_SUB, code); break;		
+		case AST_MUL: result = makeOpBin(TAC_MUL, code); break;	
+		case AST_DIV: result = makeOpBin(TAC_DIV, code); break;	
+		case AST_GT: result = makeOpBin(TAC_GT, code); break;	
+		case AST_LT: result = makeOpBin(TAC_LT, code); break;	
+		case AST_LE: result = makeOpBin(TAC_LE, code); break;	
+		case AST_GE: result = makeOpBin(TAC_GE, code); break;	
+		case AST_EQ: result = makeOpBin(TAC_EQ, code); break;	
+		case AST_NE: result = makeOpBin(TAC_NE, code); break;	
+		case AST_AND: result = makeOpBin(TAC_AND, code); break;	
+		case AST_OR: result = makeOpBin(TAC_OR, code); break;
+
+		case AST_WHEN: result = makeWhen(code); break;
+		case AST_ELSE: result = makeElse(code); break;
+		case AST_WHILE: result = makeWhile(code); break;
+		case AST_FOR: result = makeFor(node->symbol,code); break;
+		case AST_ATRIB: result = makeAtrib(node->symbol,code); break;
+		case AST_ATRIB_VEC: result = makeAtribVec(node->symbol,code); break;
+		// case AST_DEC_FUNC: result = makeFuncDef(node->son[0]->symbol, code, node); break;
+		case AST_ID_CALL: result = makeIdCall(node); break;
+		case AST_RETURN: result = makeReturn(code); break;
+		case AST_READ: result = makeRead(node->symbol); break;
+		// case AST_PRINT: result = makePrint(node, code); break;
+		// case AST_SEQNUM_ELEM: result = makeVecValues(node->symbol, code); break;
+		case AST_VAR_DEC: result = makeVariavel(node->symbol, code); break;
+		// case AST_DEC_VEC_GLOB: result = makeVec(node->symbol, node->son[0]->symbol, code); break;
+	
+		// case AST_COMMAND_BLOCK: result = code[0]; break;
+		// case AST_SEQ_CMD: result = tacJoin(code[0],code[1]); break;
+		// case AST_PARENTESIS_EXPR: result = code[0]; break;	
+		
+		default: result = tacJoin(tacJoin(tacJoin(code[0], code[1]), code[2]), code[3]);
 	}
 	
-	if(tac->target){
-	 	printf(", %s ",tac->target->text);
-		fprintf(outputTAC,", %s ",tac->target->text);
-	}
-	if(tac->op1){
-	 	printf(", %s ",tac->op1->text);
-		fprintf(outputTAC,", %s ",tac->op1->text);
-	}
-	if(tac->op2){
-	 	printf(", %s ",tac->op2->text);
-		fprintf(outputTAC,", %s ",tac->op2->text);
-	}
-	printf(")\n");
-	fprintf(outputTAC,")\n");
+	return result;
+}
 
+TAC* makeOpBin(int op, TAC** code){
+	TAC *newTac = tacCreate(op, makeTemp(), code[0] ? code[0]->res : 0,
+							  code[1] ? code[1]->res : 0, 0);
+	return tacJoin(code[0], tacJoin(code[1], newTac));
+}
+
+TAC* makeWhen(TAC** code){
+	TAC* setac = 0;
+	TAC* tacLabel = 0;
+	HASH_NODE* novaLabel = 0;
+	novaLabel = makeLabel();
+	setac = tacCreate(TAC_IFZ,novaLabel,code[0] ? code[0]->res : 0, 0, 0);
+	tacLabel = tacCreate(TAC_LABEL,novaLabel,0,0, 0);
+	return tacJoin(tacJoin(tacJoin(code[0],setac),code[1]),tacLabel);
+}
+
+TAC* makeElse(TAC** code){
+	TAC* setac = 0;
+	TAC* tacLabel1 = 0;
+	TAC* tacLabel2 = 0;
+	TAC* jmp = 0;
+	HASH_NODE* novaLabel1 = 0;
+	HASH_NODE* novaLabel2 = 0;
+	novaLabel1 = makeLabel();
+	novaLabel2 = makeLabel();
+	setac = tacCreate(TAC_IFZ,novaLabel1,code[0] ? code[0]->res : 0, 0, 0);
+	tacLabel1 = tacCreate(TAC_LABEL,novaLabel1,0,0,0);
+	tacLabel2 = tacCreate(TAC_LABEL,novaLabel2,0,0,0);
+	jmp = tacCreate(TAC_JUMP,novaLabel2,0,0,0);
+	return tacJoin(tacJoin(tacJoin(tacJoin(tacJoin(tacJoin(code[0],setac),code[1]),jmp),tacLabel1),code[2]),tacLabel2);
+}
+
+TAC* makeWhile(TAC** code){
+	TAC* setac = 0;
+	TAC* tacLabel1 = 0;
+	TAC* tacLabel2 = 0;
+	TAC* jmp = 0;
+	HASH_NODE* novaLabel1 = 0;
+	HASH_NODE* novaLabel2 = 0;
+	novaLabel1 = makeLabel();
+	novaLabel2 = makeLabel();
+	setac = tacCreate(TAC_IFZ,novaLabel2,code[0] ? code[0]->res : 0, 0, 0);
+	tacLabel1 = tacCreate(TAC_LABEL,novaLabel1,0,0,0);
+	tacLabel2 = tacCreate(TAC_LABEL,novaLabel2,0,0,0);
+	jmp = tacCreate(TAC_JUMP,novaLabel1,0,0,0);
+	return tacJoin(tacJoin(tacJoin(tacJoin(tacJoin(tacLabel1,code[0]),setac),code[1]),jmp),tacLabel2);
+}
+
+TAC* makeFor(HASH_NODE* identifier,TAC** code){
+	TAC* inicializacao = 0;
+	TAC* seMenorIgual = 0;
+	TAC* incrementa = 0;
+	TAC* jmp = 0;
+	TAC* tacLabel1 = 0;
+	TAC* tacLabel2 = 0;
+	TAC* idLiteral = 0;
+	HASH_NODE* novaLabel1 = 0;
+	HASH_NODE* novaLabel2 = 0;
+	novaLabel1 = makeLabel();
+	novaLabel2 = makeLabel();
+	idLiteral = tacCreate(TAC_LITERAL,identifier,0,0,0);
+	inicializacao = makeAtrib(identifier,code);
+	seMenorIgual = tacCreate(TAC_IFLESSEQ,novaLabel2,identifier,code[1]? code[1]->res : 0, 0);
+	tacLabel1 = tacCreate(TAC_LABEL,novaLabel1,0,0,0);
+	tacLabel2 = tacCreate(TAC_LABEL,novaLabel2,0,0,0);
+	incrementa = tacCreate(TAC_INC,identifier,0,0,0);
+	jmp = tacCreate(TAC_JUMP,novaLabel1,0,0,0);
+	return tacJoin(tacJoin(tacJoin(tacJoin(tacJoin(tacJoin(tacJoin(idLiteral,inicializacao),tacLabel1),seMenorIgual),code[2]),incrementa),jmp),tacLabel2);
+}
+
+TAC* makeAtrib(HASH_NODE* identifier, TAC** code){
+	TAC* mov = 0;
+	mov = tacCreate(TAC_MOVE, identifier, code[0]? code[0]-> res : 0,0,0);
+	return tacJoin(code[0],mov);
+}
+
+TAC* makeAtribVec(HASH_NODE* identifier, TAC** code){
+	TAC* vecAssign = 0;
+	vecAssign = tacCreate(TAC_VEC_WRITE, identifier, code[0]? code[0]-> res : 0,code[1]? code[1]-> res : 0,0);
+	return tacJoin(code[0],tacJoin(code[1],vecAssign)); 
+}
+
+TAC* makeFuncDef(HASH_NODE* identifier, TAC** code, ASTREE *funcDef){
+	ASTREE* buff;
+	TAC* tacBuff = 0;
+	TAC* tacArg = 0;
+	TAC* params = 0;
+	int i = 1;
+
+	TAC* funcBody = code[1];
+	TAC* beginFunc = tacCreate(TAC_BEGIN_FUNC, identifier, 0, 0, 0);
+
+	for(buff = funcDef->son[0]->son[1]; buff; buff = buff->son[1]){
+		tacBuff = tacGenerate(buff->son[0]);
+		tacArg = tacCreate(TAC_ARG_RECEIVE, tacBuff->res, 0, identifier, i);
+		params = tacJoin(tacJoin(params,tacBuff), tacArg);
+		i++;
+	}
+
+	TAC* endFunc = tacCreate(TAC_END_FUNC, identifier, 0, 0, 0);
+	return tacJoin(tacJoin(tacJoin(beginFunc,params),funcBody), endFunc);
+}
+
+TAC* makeIdCall(ASTREE *callFunc){
+	TAC* callTac = 0;	
+	TAC* parametros = 0;
+	ASTREE* buffer = 0;
+	TAC* tacBuff = 0;
+	TAC* tacArg = 0;
+	int i = 1;
+	HASH_NODE* func_name = callFunc->symbol;
+	for(buffer = callFunc->son[0]; buffer; buffer = buffer->son[1]){
+		tacBuff = tacGenerate(buffer->son[0]);
+		tacArg = tacCreate(TAC_ARG_CALL, 0, tacBuff->res,func_name, i);
+		parametros = tacJoin(tacJoin(parametros,tacBuff),tacArg);
+		i++;
+	}
+
+	HASH_NODE* callTemp = makeTemp();
+	callTac = tacCreate(TAC_CALL, callTemp, callFunc->symbol,0,0);
+	return tacJoin(parametros,callTac);
+}
+
+TAC* makeReturn(TAC** code){
+	TAC* retorno = 0;
+	retorno = tacCreate(TAC_RETURN,code[0]? code[0]->res : 0, 0, 0,0);
+	return tacJoin(code[0],ret);
+}
+
+TAC* makeRead(HASH_NODE* identifier){
+	TAC* symb = tacCreate(TAC_LITERAL, identifier,0,0,0);
+	TAC* ret = tacCreate(TAC_READ,identifier, 0, 0,0);
+	return tacJoin(symb,ret);
+}
+
+TAC* makePrint(ASTREE* print, TAC** code){
+	ASTREE* buff = 0;
+	TAC* prints = 0;
+	TAC* tacBuff = 0;
+	TAC* tacPrint = 0;
+	buff = print->son[0];
+	while(buff){				
+		if(buff->symbol){
+			tacBuff = tacCreate(TAC_LITERAL,buff->symbol, 0, 0, 0);
+			buff = buff->son[0];
+		}else{
+			tacBuff = tacGenerate(buff->son[0]);
+			buff = buff->son[1];
+		}
+		tacPrint = tacCreate(TAC_PRINT,tacBuff ? tacBuff->res: 0,0,0,0);	
+		prints = tacJoin(tacJoin(prints,tacBuff),tacPrint);
+	}
+	
+	return prints;
+}
+
+TAC* makeVecValues(HASH_NODE* identifier, TAC** code){
+	TAC *vecValue = tacCreate(TAC_ARRAY_VALUE, identifier, 0, 0, 0);
+	return tacJoin(vecValue, code[0]);
+}
+
+TAC* makeVariavel(HASH_NODE* identifier, TAC** code){
+	TAC *name = tacCreate(TAC_LITERAL, identifier,0,0,0);
+	TAC *var = tacCreate(TAC_VAR, identifier, code[1]->res, 0, 0);
+	return tacJoin(name,tacJoin(code[1],var));
+}
+
+TAC* makeVec(HASH_NODE* identifier, HASH_NODE* length, TAC** code){
+	TAC *vec = tacCreate(TAC_VEC, identifier, length, 0, 0);
+	return tacJoin(vec, code[0]);
+}
+
+TAC* makeVecExpr(HASH_NODE* identifier, TAC** code){	
+	TAC *value = tacCreate(TAC_ID_VECTOR, makeTemp(), identifier, code[0]? code[0]->res: 0, 0);
+	return tacJoin(code[0],value);
+}
+
+HASH_NODE* makeTemp(){
+	static int serial_temp = 0;
+	static char buffer[128];
+
+	sprintf(buffer, "temporariaLindha_%d", serial_temp);
+	serial_temp++;
+	return hash_insert(SYMBOL_VAR, buffer, 0, 0);
+}
+
+HASH_NODE* makeLabel(){
+	static int serial_label = 0;
+	static char buffer[128];
+
+	sprintf(buffer, "labelzinhaLinda_%d", serial_label);
+	serial_label++;
+	return hash_insert(SYMBOL_VAR, buffer, 0, 0);
 }

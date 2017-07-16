@@ -13,7 +13,6 @@ extern int isRunning();
 extern int yylex();
 extern int yyparse();
 extern FILE* OUT_FILE;
-extern FILE *outputTAC;
 
 int main (int argv, char **argc)
 {
@@ -39,20 +38,15 @@ int main (int argv, char **argc)
 	}
 	OUT_FILE = out;
 
-	FILE* outTAC = fopen("OUT_TAC", "w+");
-	if (!outTAC)
-	{
-		printf("Erro ao gerar arquivo de saida TAC!\n");
-		exit(1);
-	}
-	outputTAC = outTAC;
-	
 	initMe();
 	yyparse();
 	hash_print();
+
+	fprintf(stderr,"--**-- TACS --**--\n");
+	tacPrintForward(tacReverse(tacGenerate(ast)));
+
 	fclose(out);
-	fclose(outputTAC);
-	printf("Programa reconhecido com sucesso!\n");
+	//printf("Programa reconhecido com sucesso!\n");
 	exit(0);
 	
 	return 0;
