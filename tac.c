@@ -230,10 +230,9 @@ TAC * tacGenerate(ASTREE *node){
 		case AST_VAR_DEC: result = makeVariavel(node->symbol, code); break;
 		// case AST_DEC_VEC_GLOB: result = makeVec(node->symbol, node->son[0]->symbol, code); break;
 	
-		// case AST_COMMAND_BLOCK: result = code[0]; break;
-		// case AST_SEQ_CMD: result = tacJoin(code[0],code[1]); break;
-		// case AST_PARENTESIS_EXPR: result = code[0]; break;	
-		
+		case AST_COMMAND_LIST: result = code[0]; break;
+		case AST_COMMANDS: result = tacJoin(code[0],code[1]); break;
+		case AST_PARENTHESES: result = code[0]; break;	
 		default: result = tacJoin(tacJoin(tacJoin(code[0], code[1]), code[2]), code[3]);
 	}
 	
