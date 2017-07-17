@@ -8,9 +8,11 @@ f: float 10.55;
 c: byte 'x';
 d: byte 65;
 
-
 long main()
   {
+  a = 1+2;
+  print "Incrementado algumas vezes fica " a "\n";
+  a = incn(a,2);
   a = 10;
   v#2 = v[10-1];
   for (i = 1 to 10)

@@ -14,7 +14,7 @@ Grupo:
 #include "hash.h"
 #include "ast.h"
 
-#define TAC_LITERAL 	1  //ok
+#define TAC_SYMBOL	 	1  //ok
 #define TAC_ADD    		2  //ok
 #define TAC_SUB    		3  //ok
 #define TAC_MUL    		4  //ok
