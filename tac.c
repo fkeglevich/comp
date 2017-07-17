@@ -394,19 +394,21 @@ TAC* makePrint(AST_NODE* print, TAC** code){
 	TAC* prints = 0;
 	TAC* tacBuff = 0;
 	TAC* tacPrint = 0;
-	buff = print->children[0];
-	while(buff){				
+	buff = print;
+	
+	while(buff)
+	{			
 		if(buff->symbol){
 			tacBuff = tacCreate(TAC_SYMBOL,buff->symbol, 0, 0, 0);
-			buff = buff->children[0];
+			buff = buff->children[1];
 		}else{
 			tacBuff = tacGenerate(buff->children[0]);
 			buff = buff->children[1];
 		}
 		tacPrint = tacCreate(TAC_PRINT,tacBuff ? tacBuff->res: 0,0,0,0);	
 		prints = tacJoin(tacJoin(prints,tacBuff),tacPrint);
+		
 	}
-	
 	return prints;
 }
 
