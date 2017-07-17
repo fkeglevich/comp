@@ -222,7 +222,7 @@ TAC * tacGenerate(AST_NODE *node){
 		case AST_FOR: result = makeFor(node->symbol,code); break;
 		case AST_ATRIB: result = makeAtrib(node->symbol,code); break;
 		case AST_ATRIB_VECTOR: result = makeAtribVec(node->symbol,code); break;
-		// case AST_DEC_FUNC: result = makeFuncDef(node->children[0]->symbol, code, node); break;
+		case AST_FUNC_DEC: result = makeFuncDef(node->symbol, code, node); break;
 		
 		case AST_ID_CALL: result = makeIdCall(node); break;
 		case AST_RETURN: result = makeReturn(code); break;
@@ -331,11 +331,16 @@ TAC* makeFuncDef(HASH_NODE* identifier, TAC** code, AST_NODE *funcDef){
 	TAC* params = 0;
 	int i = 1;
 
-	TAC* funcBody = code[1];
+	TAC* funcBody = code[2];
 	TAC* beginFunc = tacCreate(TAC_BEGIN_FUNC, identifier, 0, 0, 0);
 
-	for(buff = funcDef->children[0]->children[1]; buff; buff = buff->children[1]){
-		tacBuff = tacGenerate(buff->children[0]);
+	for(buff = funcDef->children[1]; buff; buff = buff->children[1])
+	{
+		
+		if (buff->children[1] != NULL)		
+			tacBuff = tacGenerate(buff->children[0]);
+		else
+			tacBuff = tacGenerate(buff);
 		tacArg = tacCreate(TAC_ARG_RECEIVE, tacBuff->res, 0, identifier, i);
 		params = tacJoin(tacJoin(params,tacBuff), tacArg);
 		i++;
