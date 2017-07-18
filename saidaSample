@@ -1,0 +1,6 @@
+a : long  0 ;
+long  main ( ) {
+a = 10 + 1 ;
+print " Digite um numero: \n"  ;
+print a  ;
+};

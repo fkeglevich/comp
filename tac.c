@@ -444,7 +444,7 @@ HASH_NODE* makeTemp(){
 
 	sprintf(buffer, "temporariaLindha_%d", serial_temp);
 	serial_temp++;
-	return hash_insert(NATURE_VAR, buffer);
+	return hash_insert(SYMBOL_SCALAR, buffer);
 }
 
 HASH_NODE* makeLabel(){
@@ -453,5 +453,5 @@ HASH_NODE* makeLabel(){
 
 	sprintf(buffer, "labelzinhaLinda_%d", serial_label);
 	serial_label++;
-	return hash_insert(NATURE_VAR, buffer);
+	return hash_insert(SYMBOL_LABEL, buffer);
 }

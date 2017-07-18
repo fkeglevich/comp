@@ -8,7 +8,7 @@
 #
 
 etapa5: y.tab.c lex.yy.c
-	gcc -o etapa5 lex.yy.c ast.c hash.c y.tab.c semantic.c tac.c
+	gcc -o etapa6 lex.yy.c ast.c hash.c y.tab.c semantic.c tac.c asm.c
 	
 lex.yy.c: scanner.l
 	lex -d scanner.l
@@ -17,8 +17,8 @@ y.tab.c: parser.y
 	yacc -d parser.y
 
 tgz: clean
-	tar cvzf etapa5.tgz .
+	tar cvzf etapa6.tgz .
 
 clean:
-	rm -rf *o lex.yy.* y.tab.* etapa5 etapa5.tgz
+	rm -rf *o lex.yy.* y.tab.* etapa6 etapa6.tgz saidaAsm
 

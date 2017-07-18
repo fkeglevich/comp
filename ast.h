@@ -86,6 +86,8 @@ typedef struct ast_node {
 	struct ast_node *children[NUM_CHILDREN];
 } AST_NODE;
 
+AST_NODE* ast;
+
 AST_NODE* ast_insert(int type, HASH_NODE *symbol, AST_NODE* c0, AST_NODE* c1, AST_NODE* c2, AST_NODE* c3);
 void ast_print(AST_NODE *node);
 void ast_print_tree(AST_NODE *root);
