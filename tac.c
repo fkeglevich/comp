@@ -31,9 +31,8 @@ TAC* makeIdCall(AST_NODE *funcCall);
 TAC* makeReturn(TAC** code);
 TAC* makeRead(HASH_NODE* identifier);
 TAC* makePrint(AST_NODE* print, TAC** code);
-TAC* makeVecValues(HASH_NODE* identifier, TAC** code);
 TAC* makeVariavel(HASH_NODE* identifier, TAC** code);
-TAC* makeVec(HASH_NODE* identifier, HASH_NODE* length, TAC** code);
+TAC* makeVec(AST_NODE* astvec, TAC** code);
 TAC* makeVecExpr(HASH_NODE* identifier, TAC** code);
 
 
@@ -227,12 +226,10 @@ TAC * tacGenerate(AST_NODE *node){
 		case AST_ID_CALL: result = makeIdCall(node); break;
 		case AST_RETURN: result = makeReturn(code); break;
 		case AST_READ: result = makeRead(node->symbol); break;
-		//case AST_PRINT: result = tacJoin(code[0], tacCreate(TAC_PRINT, 0, 0, 0, 0)); break;
 		case AST_PRINT: result = makePrint(node, code); break;
-		// case AST_SEQNUM_ELEM: result = makeVecValues(node->symbol, code); break;
 		case AST_VAR_DEC: result = makeVariavel(node->symbol, code); break;
-		// case AST_DEC_VEC_GLOB: result = makeVec(node->symbol, node->children[0]->symbol, code); break;
-	
+		case AST_VEC_DEC: result = makeVec(node, code); break;
+
 		case AST_COMMAND_LIST: result = code[0]; break;
 		case AST_COMMANDS: result = tacJoin(code[0],code[1]); break;
 		case AST_PARENTHESES: result = code[0]; break;	
@@ -336,7 +333,6 @@ TAC* makeFuncDef(HASH_NODE* identifier, TAC** code, AST_NODE *funcDef){
 
 	for(buff = funcDef->children[1]; buff; buff = buff->children[1])
 	{
-		
 		if (buff->children[1] != NULL)		
 			tacBuff = tacGenerate(buff->children[0]);
 		else
@@ -417,20 +413,35 @@ TAC* makePrint(AST_NODE* print, TAC** code){
 	return prints;
 }
 
-TAC* makeVecValues(HASH_NODE* identifier, TAC** code){
-	TAC *vecValue = tacCreate(TAC_ARRAY_VALUE, identifier, 0, 0, 0);
-	return tacJoin(vecValue, code[0]);
-}
-
 TAC* makeVariavel(HASH_NODE* identifier, TAC** code){
 	TAC *name = tacCreate(TAC_SYMBOL, identifier,0,0,0);
 	TAC *var = tacCreate(TAC_VAR, identifier, code[1]->res, 0, 0);
 	return tacJoin(name,tacJoin(code[1],var));
 }
 
-TAC* makeVec(HASH_NODE* identifier, HASH_NODE* length, TAC** code){
-	TAC *vec = tacCreate(TAC_VEC, identifier, length, 0, 0);
-	return tacJoin(vec, code[0]);
+TAC* makeVec(AST_NODE* astvec, TAC** code)
+{
+	HASH_NODE* identifier = astvec->symbol;
+	HASH_NODE* length = astvec->children[1]->symbol;
+
+	TAC *vectac = tacCreate(TAC_VEC, identifier, length, 0, 0);
+	TAC *vecinits = NULL;
+	TAC *tacvecinit = NULL;	
+	TAC *tacarrayval = NULL;	
+
+	AST_NODE* vecinit;
+	for (vecinit = astvec->children[2]; vecinit; vecinit = vecinit->children[1])
+	{
+		if (vecinit->children[1] != NULL)		
+			tacvecinit = tacGenerate(vecinit->children[0]);
+		else
+			tacvecinit = tacGenerate(vecinit);
+	
+		tacarrayval = tacCreate(TAC_ARRAY_VALUE, tacvecinit->res, 0, identifier, 0);
+		vecinits = tacJoin(tacJoin(vecinits, tacvecinit), tacarrayval);
+	}
+
+	return tacJoin(tacJoin(vectac, vecinits), code[0]);
 }
 
 TAC* makeVecExpr(HASH_NODE* identifier, TAC** code){	
