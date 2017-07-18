@@ -10,12 +10,12 @@ Grupo:
 
 #include "asm.h"
 
-void asmPrintFixed(FILE* arquivoSaida, TAC* tacParam);
-void asmPushHash(FILE* arquivoSaida);
-int numConsLabel = 1;
-int numLit = 0;
+void asmImpressao(FILE* arquivoSaida, TAC* tacParam);
+void asmEnfiaHash(FILE* arquivoSaida);
+int nrSeqLabel = 1;
+int nrSeqLit = 0;
 
-void asmPushHash(FILE* arquivoSaida){
+void asmEnfiaHash(FILE* arquivoSaida){
 	HASH_NODE *node;
 	int i;	
 	fprintf(arquivoSaida, "\n.data\n");
@@ -33,279 +33,337 @@ void asmPushHash(FILE* arquivoSaida){
 	}
 }
 
-void asmPrintFixed(FILE* arquivoSaida, TAC* tacParam){
-	TAC* tac;
+void asmImpressao(FILE* arquivoSaida, TAC* tacParam){
+	TAC* tacTemp;
 	fprintf(arquivoSaida,	".LC0:\n"
 					"\t.string \"%%d\"\n"); 	
-	for(tac=tacParam; tac; tac = tac->next){	
-		switch(tac->type){
+	for(tacTemp=tacParam; tacTemp; tacTemp = tacTemp->next){	
+		switch(tacTemp->type){
 			case TAC_DIV:
-				if(tac->op2->type != SYMBOL_LABEL && tac->op1->type != SYMBOL_SCALAR){
-					tac->posicaoParam = numLit;	
+				if(tacTemp->op2->type != SYMBOL_LABEL && tacTemp->op1->type != SYMBOL_SCALAR){
+					tacTemp->posicaoParam = nrSeqLit;	
 				}
 				break;
 			case TAC_ARG_RECEIVE:
 				fprintf(arquivoSaida,	"%s:\n"
 									"\t.long 0\n",
-									tac->res->text); break;
+									tacTemp->res->text); break;
 			case TAC_PRINT:
-				if(tac->res->type == SYMBOL_LIT_STRING){
+				if(tacTemp->res->type == SYMBOL_LIT_STRING){
 					fprintf(arquivoSaida,	".LC%d:\n"
 											"\t.string %s\n",
-									numConsLabel, tac->res->text); 
-					tac->posicaoParam = numConsLabel;
-					numConsLabel++;
+									nrSeqLabel, tacTemp->res->text); 
+					tacTemp->posicaoParam = nrSeqLabel;
+					nrSeqLabel++;
 				}else{
-					tac->posicaoParam = 0;
+					tacTemp->posicaoParam = 0;
 				}
 				break;
 			case TAC_VAR:
 				fprintf(arquivoSaida,	"%s:\n"
 								"\t.long %s\n",
-						tac->res->text, tac->op1->text); break;
+						tacTemp->res->text, tacTemp->op1->text); break;
 			default: break;
 		}
 	}
 }
 
 void asmGen(TAC* tacParam, FILE* arquivoSaida){ 
-	TAC* tac;
+	TAC* tacTemp;
 	TAC* tacImpressao = tacParam;	
-	asmPushHash(arquivoSaida);
-	asmPrintFixed(arquivoSaida, tacImpressao);
-	int pos = 0;	
-	int numLabel = 0;
-	int numParamsCall = 0;	
-	int numParamsReceive = 0;	
-	for(tac=tacParam; tac; tac = tac->next){	
-		//printTacType(tac->type);printf("\n"); //debug
-		switch(tac->type){
+	asmEnfiaHash(arquivoSaida);
+	asmImpressao(arquivoSaida, tacImpressao);
+	int posicaoAtual = 0, valorLabel = 0, numeroParamChamada = 0, numparamRec = 0;
+	for(tacTemp=tacParam; tacTemp; tacTemp = tacTemp->next){	
+		switch(tacTemp->type){
 			case TAC_SYMBOL: break;
 			case TAC_VAR: break;
 			case TAC_VEC:
-					if(tac->next->type ==  TAC_ARRAY_VALUE){
-						fprintf(arquivoSaida,	"%s:\n", tac->res->text); 
+					if(tacTemp->next->type ==  TAC_ARRAY_VALUE){
+						fprintf(arquivoSaida,	"%s:\n", tacTemp->res->text); 
 					}else{	
-						pos = atoi(tac->op1->text) * 4; 
-						fprintf(arquivoSaida,	"\n.comm %s, %d\n", tac->res->text, pos); 
+						posicaoAtual = atoi(tacTemp->op1->text) * 4; 
+						fprintf(arquivoSaida,	"\n.comm %s, %d\n", tacTemp->res->text, posicaoAtual); 
 					}
 					break;
 			case TAC_ARRAY_VALUE: fprintf(arquivoSaida,	"\t.long %s\n",
-									tac->res->text); break;
-			case TAC_ADD:	fprintf(arquivoSaida,	"\n\t## TAC_ADD\n");
-						  	if(tac->op1->type == SYMBOL_LABEL || tac->op1->type == SYMBOL_SCALAR)
-						  		fprintf(arquivoSaida,	"\tmovl %s(%%rip), %%eax\n",  tac->op1->text); 
+									tacTemp->res->text); break;
+			case TAC_ADD:	fprintf(arquivoSaida,	"\n\t## + ##\n");
+						  	if(tacTemp->op1->type == SYMBOL_LABEL || tacTemp->op1->type == SYMBOL_SCALAR)
+						  		fprintf(arquivoSaida,	"\tmovl %s(%%rip), %%eax\n",  tacTemp->op1->text); 
 							else
-								fprintf(arquivoSaida,	"\tmovl $%s, %%eax\n",  tac->op1->text); 	
-							if(tac->op2->type == SYMBOL_LABEL || tac->op1->type == SYMBOL_SCALAR)
-						  		fprintf(arquivoSaida,	"\taddl %s(%%rip), %%eax\n",  tac->op2->text); 
+								fprintf(arquivoSaida,	"\tmovl $%s, %%eax\n",  tacTemp->op1->text); 	
+							if(tacTemp->op2->type == SYMBOL_LABEL || tacTemp->op1->type == SYMBOL_SCALAR)
+						  		fprintf(arquivoSaida,	"\taddl %s(%%rip), %%eax\n",  tacTemp->op2->text); 
 							else
-								fprintf(arquivoSaida,	"\taddl $%s, %%eax\n",  tac->op2->text); 	 								
-							fprintf(arquivoSaida,	"\tmovl %%eax, %s(%%rip)\n",  tac->res->text); 	 									
+								fprintf(arquivoSaida,	"\taddl $%s, %%eax\n",  tacTemp->op2->text); 	 								
+							fprintf(arquivoSaida,	"\tmovl %%eax, %s(%%rip)\n",  tacTemp->res->text); 	 									
 							break;
-			case TAC_SUB: fprintf(arquivoSaida,	"\n\t## TAC_SUB\n");
-						  	if(tac->op1->type == SYMBOL_LABEL || tac->op1->type == SYMBOL_SCALAR)
-						  		fprintf(arquivoSaida,	"\tmovl %s(%%rip), %%eax\n",  tac->op1->text); 
+			case TAC_SUB: fprintf(arquivoSaida,	"\n\t## - ##\n");
+						  	if(tacTemp->op1->type == SYMBOL_LABEL || tacTemp->op1->type == SYMBOL_SCALAR)
+						  		fprintf(arquivoSaida,	"\tmovl %s(%%rip), %%eax\n",  tacTemp->op1->text); 
 							else
-								fprintf(arquivoSaida,	"\tmovl $%s, %%eax\n",  tac->op1->text); 	
-							if(tac->op2->type == SYMBOL_LABEL || tac->op1->type == SYMBOL_SCALAR)
-						  		fprintf(arquivoSaida,	"\tsubl %s(%%rip), %%eax\n",  tac->op2->text); 
+								fprintf(arquivoSaida,	"\tmovl $%s, %%eax\n",  tacTemp->op1->text); 	
+							if(tacTemp->op2->type == SYMBOL_LABEL || tacTemp->op1->type == SYMBOL_SCALAR)
+						  		fprintf(arquivoSaida,	"\tsubl %s(%%rip), %%eax\n",  tacTemp->op2->text); 
 							else
-								fprintf(arquivoSaida,	"\tsubl $%s, %%eax\n",  tac->op2->text); 	 								
-							fprintf(arquivoSaida,	"\tmovl %%eax, %s(%%rip)\n",  tac->res->text); 	 									
+								fprintf(arquivoSaida,	"\tsubl $%s, %%eax\n",  tacTemp->op2->text); 	 								
+							fprintf(arquivoSaida,	"\tmovl %%eax, %s(%%rip)\n",  tacTemp->res->text); 	 									
 							break;
-			case TAC_MUL: fprintf(arquivoSaida,	"\n\t## TAC_MUL\n");
-						  	if(tac->op1->type == SYMBOL_LABEL || tac->op1->type == SYMBOL_SCALAR)
-						  		fprintf(arquivoSaida,	"\tmovl %s(%%rip), %%eax\n",  tac->op1->text); 
+			case TAC_MUL: fprintf(arquivoSaida,	"\n\t## * ##\n");
+						  	if(tacTemp->op1->type == SYMBOL_LABEL || tacTemp->op1->type == SYMBOL_SCALAR)
+						  		fprintf(arquivoSaida,	"\tmovl %s(%%rip), %%eax\n",  tacTemp->op1->text); 
 							else
-								fprintf(arquivoSaida,	"\tmovl $%s, %%eax\n",  tac->op1->text); 	
-							if(tac->op2->type == SYMBOL_LABEL || tac->op1->type == SYMBOL_SCALAR)
-						  		fprintf(arquivoSaida,	"\timull %s(%%rip), %%eax\n",  tac->op2->text); 
+								fprintf(arquivoSaida,	"\tmovl $%s, %%eax\n",  tacTemp->op1->text); 	
+							if(tacTemp->op2->type == SYMBOL_LABEL || tacTemp->op1->type == SYMBOL_SCALAR)
+						  		fprintf(arquivoSaida,	"\timull %s(%%rip), %%eax\n",  tacTemp->op2->text); 
 							else
-								fprintf(arquivoSaida,	"\timull $%s, %%eax\n",  tac->op2->text); 	 								
-							fprintf(arquivoSaida,	"\tmovl %%eax, %s(%%rip)\n",  tac->res->text); 	 									
+								fprintf(arquivoSaida,	"\timull $%s, %%eax\n",  tacTemp->op2->text); 	 								
+							fprintf(arquivoSaida,	"\tmovl %%eax, %s(%%rip)\n",  tacTemp->res->text); 	 									
 							break;
-			case TAC_DIV: fprintf(arquivoSaida,	"\n\t## TAC_DIV\n");
-						  	if(tac->op1->type == SYMBOL_LABEL || tac->op1->type == SYMBOL_SCALAR)
-								fprintf(arquivoSaida,"\tmovl %s(%%rip), %%eax\n", tac->op1->text);
+			case TAC_DIV: fprintf(arquivoSaida,	"\n\t## / ##\n");
+						  	if(tacTemp->op1->type == SYMBOL_LABEL || tacTemp->op1->type == SYMBOL_SCALAR)
+								fprintf(arquivoSaida,"\tmovl %s(%%rip), %%eax\n", tacTemp->op1->text);
 						  	else
-								fprintf(arquivoSaida,	"\tmovl $%s, %%eax\n",  tac->op1->text);
+								fprintf(arquivoSaida,	"\tmovl $%s, %%eax\n",  tacTemp->op1->text);
 							fprintf(arquivoSaida,"\tcltd\n");
-							if(tac->op1->type == SYMBOL_LABEL || tac->op1->type == SYMBOL_SCALAR)
-								fprintf(arquivoSaida,"\tidivl %s(%%rip)\n", tac->op2->text);
+							if(tacTemp->op1->type == SYMBOL_LABEL || tacTemp->op1->type == SYMBOL_SCALAR)
+								fprintf(arquivoSaida,"\tidivl %s(%%rip)\n", tacTemp->op2->text);
 							else
-								fprintf(arquivoSaida,"\tidivl lit%s(%%rip)\n", tac->op2->text);				
-							fprintf(arquivoSaida,"\tmovl %%eax, %s(%%rip)\n", tac->res->text); break;
-			case TAC_GT: fprintf(arquivoSaida,	"\n\t## TAC_GT\n");
-					  	if(tac->op1->type == SYMBOL_LABEL || tac->op1->type == SYMBOL_SCALAR)
-					  		fprintf(arquivoSaida,	"\tmovl %s(%%rip), %%edx\n",  tac->op1->text); 
+								fprintf(arquivoSaida,"\tidivl lit%s(%%rip)\n", tacTemp->op2->text);				
+							fprintf(arquivoSaida,"\tmovl %%eax, %s(%%rip)\n", tacTemp->res->text); break;
+			case TAC_GT: fprintf(arquivoSaida,	"\n\t## > ##\n");
+					  	if(tacTemp->op1->type == SYMBOL_LABEL || tacTemp->op1->type == SYMBOL_SCALAR)
+					  		fprintf(arquivoSaida,	"\tmovl %s(%%rip), %%edx\n",  tacTemp->op1->text); 
 						else
-							fprintf(arquivoSaida,	"\tmovl $%s, %%edx\n",  tac->op1->text); 	
-						if(tac->op2->type == SYMBOL_LABEL || tac->op1->type == SYMBOL_SCALAR)
-					  		fprintf(arquivoSaida,	"\tmovl %s(%%rip), %%eax\n",  tac->op2->text); 
+							fprintf(arquivoSaida,	"\tmovl $%s, %%edx\n",  tacTemp->op1->text); 	
+						if(tacTemp->op2->type == SYMBOL_LABEL || tacTemp->op1->type == SYMBOL_SCALAR)
+					  		fprintf(arquivoSaida,	"\tmovl %s(%%rip), %%eax\n",  tacTemp->op2->text); 
 						else
-							fprintf(arquivoSaida,	"\tmovl $%s, %%eax\n",  tac->op2->text); 		
+							fprintf(arquivoSaida,	"\tmovl $%s, %%eax\n",  tacTemp->op2->text); 		
 						fprintf(arquivoSaida,"\tcmpl %%eax, %%edx\n"
 										"\tsetg %%al\n"
 										"\tmovzbl %%al, %%eax\n"
 										"\tmovl %%eax, %s(%%rip)\n",
-							tac->res->text); break; 
-			case TAC_LT: fprintf(arquivoSaida,	"\n\t## TAC_LT\n");
-					  	if(tac->op1->type == SYMBOL_LABEL || tac->op1->type == SYMBOL_SCALAR)
-					  		fprintf(arquivoSaida,	"\tmovl %s(%%rip), %%edx\n",  tac->op1->text); 
+							tacTemp->res->text); break; 
+			case TAC_LT: fprintf(arquivoSaida,	"\n\t## < ##\n");
+					  	if(tacTemp->op1->type == SYMBOL_LABEL || tacTemp->op1->type == SYMBOL_SCALAR)
+					  		fprintf(arquivoSaida,	"\tmovl %s(%%rip), %%edx\n",  tacTemp->op1->text); 
 						else
-							fprintf(arquivoSaida,	"\tmovl $%s, %%edx\n",  tac->op1->text); 	
-						if(tac->op2->type == SYMBOL_LABEL || tac->op1->type == SYMBOL_SCALAR)
-					  		fprintf(arquivoSaida,	"\tmovl %s(%%rip), %%eax\n",  tac->op2->text); 
+							fprintf(arquivoSaida,	"\tmovl $%s, %%edx\n",  tacTemp->op1->text); 	
+						if(tacTemp->op2->type == SYMBOL_LABEL || tacTemp->op1->type == SYMBOL_SCALAR)
+					  		fprintf(arquivoSaida,	"\tmovl %s(%%rip), %%eax\n",  tacTemp->op2->text); 
 						else
-							fprintf(arquivoSaida,	"\tmovl $%s, %%eax\n",  tac->op2->text); 		
+							fprintf(arquivoSaida,	"\tmovl $%s, %%eax\n",  tacTemp->op2->text); 		
 						fprintf(arquivoSaida,"\tcmpl %%eax, %%edx\n"
 										"\tsetl %%al\n"
 										"\tmovzbl %%al, %%eax\n"
 										"\tmovl %%eax, %s(%%rip)\n",
-							tac->res->text); break; 
-			case TAC_GE: fprintf(arquivoSaida,	"\n\t## TAC_GE\n");
-					  	if(tac->op1->type == SYMBOL_LABEL || tac->op1->type == SYMBOL_SCALAR)
-					  		fprintf(arquivoSaida,	"\tmovl %s(%%rip), %%edx\n",  tac->op1->text); 
+							tacTemp->res->text); break; 
+			case TAC_GE: fprintf(arquivoSaida,	"\n\t## >= ##\n");
+					  	if(tacTemp->op1->type == SYMBOL_LABEL || tacTemp->op1->type == SYMBOL_SCALAR)
+					  		fprintf(arquivoSaida,	"\tmovl %s(%%rip), %%edx\n",  tacTemp->op1->text); 
 						else
-							fprintf(arquivoSaida,	"\tmovl $%s, %%edx\n",  tac->op1->text); 	
-						if(tac->op2->type == SYMBOL_LABEL || tac->op1->type == SYMBOL_SCALAR)
-					  		fprintf(arquivoSaida,	"\tmovl %s(%%rip), %%eax\n",  tac->op2->text); 
+							fprintf(arquivoSaida,	"\tmovl $%s, %%edx\n",  tacTemp->op1->text); 	
+						if(tacTemp->op2->type == SYMBOL_LABEL || tacTemp->op1->type == SYMBOL_SCALAR)
+					  		fprintf(arquivoSaida,	"\tmovl %s(%%rip), %%eax\n",  tacTemp->op2->text); 
 						else
-							fprintf(arquivoSaida,	"\tmovl $%s, %%eax\n",  tac->op2->text); 		
+							fprintf(arquivoSaida,	"\tmovl $%s, %%eax\n",  tacTemp->op2->text); 		
 						fprintf(arquivoSaida,"\tcmpl %%eax, %%edx\n"
 										"\tsetge %%al\n"
 										"\tmovzbl %%al, %%eax\n"
 										"\tmovl %%eax, %s(%%rip)\n",
-							tac->res->text); break; 
-			case TAC_LE:fprintf(arquivoSaida,	"\n\t## TAC_LE\n");
-					  	if(tac->op1->type == SYMBOL_LABEL || tac->op1->type == SYMBOL_SCALAR)
-					  		fprintf(arquivoSaida,	"\tmovl %s(%%rip), %%edx\n",  tac->op1->text); 
+							tacTemp->res->text); break; 
+			case TAC_LE:fprintf(arquivoSaida,	"\n\t## <= ##\n");
+					  	if(tacTemp->op1->type == SYMBOL_LABEL || tacTemp->op1->type == SYMBOL_SCALAR)
+					  		fprintf(arquivoSaida,	"\tmovl %s(%%rip), %%edx\n",  tacTemp->op1->text); 
 						else
-							fprintf(arquivoSaida,	"\tmovl $%s, %%edx\n",  tac->op1->text); 	
-						if(tac->op2->type == SYMBOL_LABEL || tac->op1->type == SYMBOL_SCALAR)
-					  		fprintf(arquivoSaida,	"\tmovl %s(%%rip), %%eax\n",  tac->op2->text); 
+							fprintf(arquivoSaida,	"\tmovl $%s, %%edx\n",  tacTemp->op1->text); 	
+						if(tacTemp->op2->type == SYMBOL_LABEL || tacTemp->op1->type == SYMBOL_SCALAR)
+					  		fprintf(arquivoSaida,	"\tmovl %s(%%rip), %%eax\n",  tacTemp->op2->text); 
 						else
-							fprintf(arquivoSaida,	"\tmovl $%s, %%eax\n",  tac->op2->text); 		
+							fprintf(arquivoSaida,	"\tmovl $%s, %%eax\n",  tacTemp->op2->text); 		
 						fprintf(arquivoSaida,"\tcmpl %%eax, %%edx\n"
 										"\tsetle %%al\n"
 										"\tmovzbl %%al, %%eax\n"
 										"\tmovl %%eax, %s(%%rip)\n",
-							tac->res->text); break; 
-			case TAC_EQ: fprintf(arquivoSaida,	"\n\t## TAC_EQ\n");
-					  	if(tac->op1->type == SYMBOL_LABEL || tac->op1->type == SYMBOL_SCALAR)
-					  		fprintf(arquivoSaida,	"\tmovl %s(%%rip), %%edx\n",  tac->op1->text); 
+							tacTemp->res->text); break; 
+			case TAC_EQ: fprintf(arquivoSaida,	"\n\t## == ##\n");
+					  	if(tacTemp->op1->type == SYMBOL_LABEL || tacTemp->op1->type == SYMBOL_SCALAR)
+					  		fprintf(arquivoSaida,	"\tmovl %s(%%rip), %%edx\n",  tacTemp->op1->text); 
 						else
-							fprintf(arquivoSaida,	"\tmovl $%s, %%edx\n",  tac->op1->text); 	
-						if(tac->op2->type == SYMBOL_LABEL || tac->op1->type == SYMBOL_SCALAR)
-					  		fprintf(arquivoSaida,	"\tmovl %s(%%rip), %%eax\n",  tac->op2->text); 
+							fprintf(arquivoSaida,	"\tmovl $%s, %%edx\n",  tacTemp->op1->text); 	
+						if(tacTemp->op2->type == SYMBOL_LABEL || tacTemp->op1->type == SYMBOL_SCALAR)
+					  		fprintf(arquivoSaida,	"\tmovl %s(%%rip), %%eax\n",  tacTemp->op2->text); 
 						else
-							fprintf(arquivoSaida,	"\tmovl $%s, %%eax\n",  tac->op2->text); 		
+							fprintf(arquivoSaida,	"\tmovl $%s, %%eax\n",  tacTemp->op2->text); 		
 						fprintf(arquivoSaida,"\tcmpl %%eax, %%edx\n"
 										"\tsete %%al\n"
 										"\tmovzbl %%al, %%eax\n"
 										"\tmovl %%eax, %s(%%rip)\n",
-							tac->res->text); break; 
-			case TAC_NE: fprintf(arquivoSaida,	"\n\t## TAC_NE\n");
-					  	if(tac->op1->type == SYMBOL_LABEL || tac->op1->type == SYMBOL_SCALAR)
-					  		fprintf(arquivoSaida,	"\tmovl %s(%%rip), %%edx\n",  tac->op1->text); 
+							tacTemp->res->text); break; 
+			case TAC_NE: fprintf(arquivoSaida,	"\n\t## != ##\n");
+					  	if(tacTemp->op1->type == SYMBOL_LABEL || tacTemp->op1->type == SYMBOL_SCALAR)
+					  		fprintf(arquivoSaida,	"\tmovl %s(%%rip), %%edx\n",  tacTemp->op1->text); 
 						else
-							fprintf(arquivoSaida,	"\tmovl $%s, %%edx\n",  tac->op1->text); 	
-						if(tac->op2->type == SYMBOL_LABEL || tac->op1->type == SYMBOL_SCALAR)
-					  		fprintf(arquivoSaida,	"\tmovl %s(%%rip), %%eax\n",  tac->op2->text); 
+							fprintf(arquivoSaida,	"\tmovl $%s, %%edx\n",  tacTemp->op1->text); 	
+						if(tacTemp->op2->type == SYMBOL_LABEL || tacTemp->op1->type == SYMBOL_SCALAR)
+					  		fprintf(arquivoSaida,	"\tmovl %s(%%rip), %%eax\n",  tacTemp->op2->text); 
 						else
-							fprintf(arquivoSaida,	"\tmovl $%s, %%eax\n",  tac->op2->text); 		
+							fprintf(arquivoSaida,	"\tmovl $%s, %%eax\n",  tacTemp->op2->text); 		
 						fprintf(arquivoSaida,"\tcmpl %%eax, %%edx\n"
 										"\tsetne %%al\n"
 										"\tmovzbl %%al, %%eax\n"
 										"\tmovl %%eax, %s(%%rip)\n",
-							tac->res->text); break; 
-			case TAC_BEGIN_FUNC: fprintf(arquivoSaida,	"\n\t## TAC_BEGIN_FUNC\n"
+							tacTemp->res->text); break; 
+			case TAC_BEGIN_FUNC: fprintf(arquivoSaida,	"\n\t## Inicio de Funcao ##\n"
 											"\t.text\n"
 											"\t.globl %s\n"
 											"%s:\n"				
 								  			"\t.cfi_startproc\n"
 											"\tpushq	%%rbp\n",
-								  tac->res->text, tac->res->text); break; 
-			case TAC_END_FUNC: fprintf(arquivoSaida,	"\n\t## TAC_END_FUNC\n"
+								  tacTemp->res->text, tacTemp->res->text); break; 
+			case TAC_END_FUNC: fprintf(arquivoSaida,	"\n\t## Final de funcao ##\n"
 											"\tpopq	%%rbp\n"				
 								  			"\tret\n"
 											"\t.cfi_endproc\n"); break; 
-			case TAC_RETURN: if(tac->res->type == SYMBOL_LABEL || tac->res->type == SYMBOL_SCALAR){ 
-							 fprintf(arquivoSaida,"\n\t## TAC_RETURN\n"
+			case TAC_RETURN: if(tacTemp->res->type == SYMBOL_LABEL || tacTemp->res->type == SYMBOL_SCALAR){ 
+							 fprintf(arquivoSaida,"\n\t## Retorno ##\n"
 											"\tmovl %s(%%rip), %%eax\n",
-								  tac->res->text); 
+								  tacTemp->res->text); 
 							}else{
-								 fprintf(arquivoSaida,"\n\t## TAC_RETURN\n"
+								 fprintf(arquivoSaida,"\n\t## Retorno ##\n"
 											"\tmovl $%s, %%eax\n",
-								  tac->res->text); 
+								  tacTemp->res->text); 
 							}break; 
-			case TAC_MOVE: if(tac->op1->type == SYMBOL_LABEL || tac->op1->type == SYMBOL_SCALAR){ 
-								fprintf(arquivoSaida,"\n\t## TAC_MOVE\n"
+			case TAC_MOVE: if(tacTemp->op1->type == SYMBOL_LABEL || tacTemp->op1->type == SYMBOL_SCALAR){ 
+								fprintf(arquivoSaida,"\n\t## Move ##\n"
 											"\tmovl %s(%%rip), %%eax\n"
 											"\tmovl %%eax, %s(%%rip)\n",
-								  tac->op1->text, tac->res->text);
+								  tacTemp->op1->text, tacTemp->res->text);
 							}else{
-								fprintf(arquivoSaida,"\n\t## TAC_MOVE\n"
+								fprintf(arquivoSaida,"\n\t## Move ##\n"
 											"\tmovl $%s, %%eax\n"
 											"\tmovl %%eax, %s(%%rip)\n",
-								  tac->op1->text, tac->res->text);
+								  tacTemp->op1->text, tacTemp->res->text);
 							} break; 
-			case TAC_IFZ: fprintf(arquivoSaida,	"\n\t## TAC_IFZ\n"
+			case TAC_PRINT: if(tacTemp->res->type == SYMBOL_LIT_STRING){ //já que tudo é inteiro
+								fprintf(arquivoSaida,	"\n\t## Imprimir variavel que seria string ##\n"
+											"\tmovl $.LC%d, %%edi\n"
+											"\tmovl $0, %%eax\n"
+											"\tcall printf\n",
+								  tacTemp->posicaoParam); 
+							 }else{
+								fprintf(arquivoSaida,	"\n\t## Imprimir variavel ##\n"
+											"\tmovl %s(%%rip), %%eax\n"
+											"\tmovl %%eax, %%esi\n"
+											"\tmovl $.LC%d, %%edi\n"
+											"\tmovl $0, %%eax\n"
+											"\tcall printf\n",
+								  tacTemp->res->text, tacTemp->posicaoParam); 
+							 } 							
+							 break;
+			case TAC_READ: fprintf(arquivoSaida, "\n\t## Read ##\n"
+											"\tmovl $%s, %%esi\n"
+											"\tmovl	$.LC0, %%edi\n"
+											"\tmovl	$0, %%eax\n"
+											"\tcall	__isoc99_scanf\n"
+											"\tmovl	$0, %%eax\n",
+											tacTemp->res->text);break;
+			case TAC_CALL:  numeroParamChamada = 0;
+							fprintf(arquivoSaida,	"\n\t## Chamada ##\n"
+											"\tcall %s\n"
+											"\tmovl %%eax, %s(%%rip)\n",
+								  tacTemp->op1->text, tacTemp->res->text); 
+			case TAC_ID_CALL:	numeroParamChamada++;
+								fprintf(arquivoSaida,	"\n\t## Chamada de identificador ##\n");
+								if(tacTemp->op1->type == SYMBOL_LABEL || tacTemp->op1->type == SYMBOL_SCALAR){
+									fprintf(arquivoSaida,	"\tmovl %s(%%rip), ", tacTemp->op1->text);
+								}else{
+									fprintf(arquivoSaida,	"\tmovl $%s, ", tacTemp->op1->text);
+								}	
+								switch(numeroParamChamada){
+									case 1: fprintf(arquivoSaida,	"%%edi\n"); break;
+									case 2: fprintf(arquivoSaida,	"%%esi\n"); break;
+									case 3: fprintf(arquivoSaida,	"%%edx\n"); break;
+									case 4: fprintf(arquivoSaida,	"%%ecx\n"); break;
+									case 5: fprintf(arquivoSaida, "%%r8d\n"); break;
+									case 6: fprintf(arquivoSaida,	"%%r9d\n"); break;
+									default: fprintf(stderr,"[E]rror: max num params exceed\n");  exit(5);
+								}
+								break;
+			case TAC_ARG_RECEIVE:
+								numparamRec++;
+								fprintf(arquivoSaida,	"\n\t## Atribuicao de argumentos ##\n");
+								switch(numparamRec){
+									case 1: fprintf(arquivoSaida,	"\tmovl %%edi, "); break;
+									case 2: fprintf(arquivoSaida,	"\tmovl %%esi, "); break;
+									case 3: fprintf(arquivoSaida,	"\tmovl %%edx, "); break;
+									case 4: fprintf(arquivoSaida,	"\tmovl %%ecx, "); break;
+									case 5: fprintf(arquivoSaida,	"\tmovl %%r8d, "); break;
+									case 6: fprintf(arquivoSaida,	"\tmovl %%r9d, "); break;
+									default: fprintf(stderr,"[E]rror: max num params exceed\n"); exit(5);
+								}
+								if(tacTemp->res->type == SYMBOL_LABEL || tacTemp->res->type == SYMBOL_SCALAR){
+								fprintf(arquivoSaida,	"%s(%%rip)\n", tacTemp->res->text);
+								}else{
+									fprintf(arquivoSaida,	"$%s\n", tacTemp->res->text);
+								}
+								if(tacTemp->next->next->type != TAC_ARG_RECEIVE) numparamRec = 0;
+								break;
+			case TAC_IFZ: fprintf(arquivoSaida,	"\n\t## Se zero ##\n"
 											"\tmovl %s(%%rip), %%eax\n"
 											"\ttestl %%eax, %%eax\n"
 											"\tje .%s\n",
-								  tac->op1->text, tac->res->text); break;
-			case TAC_IFLESSEQ: 	fprintf(arquivoSaida,	"\n\t## TAC_IFLESSEQ\n"
+								  tacTemp->op1->text, tacTemp->res->text); break;
+			case TAC_IFLESSEQ: 	fprintf(arquivoSaida,	"\n\t## Se menor igual ##\n"
 											"\tmovl %s(%%rip), %%eax\n",
-											tac->op1->text);
-							   	if (tac->op2->type == SYMBOL_LABEL || tac->op2->type == SYMBOL_SCALAR)
-									fprintf(arquivoSaida, "\tcmpl %s(%%rip), %%eax\n", tac->op2->text);
+											tacTemp->op1->text);
+							   	if (tacTemp->op2->type == SYMBOL_LABEL || tacTemp->op2->type == SYMBOL_SCALAR)
+									fprintf(arquivoSaida, "\tcmpl %s(%%rip), %%eax\n", tacTemp->op2->text);
 								else
-									fprintf(arquivoSaida, "\tcmpl $%s, %%eax\n", tac->op2->text);
-								fprintf(arquivoSaida,"\tjnbe .%s\n",tac->res->text); break;
-			case TAC_INC: fprintf(arquivoSaida,	"\n\t## TAC_INC\n"
+									fprintf(arquivoSaida, "\tcmpl $%s, %%eax\n", tacTemp->op2->text);
+								fprintf(arquivoSaida,"\tjnbe .%s\n",tacTemp->res->text); break;
+			case TAC_INC: fprintf(arquivoSaida,	"\n\t## Inc ##\n"
 											"\tmovl %s(%%rip), %%eax\n"
 											"\taddl $1, %%eax\n"
 											"\tmovl %%eax, %s(%%rip)\n",
-								  tac->res->text, tac->res->text); break;
-			case TAC_LABEL: fprintf(arquivoSaida,	"\n\t## TAC_LABEL\n"
+								  tacTemp->res->text, tacTemp->res->text); break;
+			case TAC_LABEL: fprintf(arquivoSaida,	"\n\t## Label ##\n"
 											".%s:\n",
-								  tac->res->text); break;
-			case TAC_JUMP: fprintf(arquivoSaida,	"\n\t## TAC_JUMP\n"
+								  tacTemp->res->text); break;
+			case TAC_JUMP: fprintf(arquivoSaida,	"\n\t## Jump ##\n"
 											"\tjmp .%s\n",
-								  tac->res->text); break;
-			case TAC_VEC_WRITE: pos = atoi(tac->op1->text) * 4; 
-								if(tac->op2->type == SYMBOL_LABEL || tac->op2->type == SYMBOL_SCALAR){
-									fprintf(arquivoSaida,	"\n\t## TAC_VEC_WRITE\n"
+								  tacTemp->res->text); break;
+			case TAC_VEC_WRITE: posicaoAtual = atoi(tacTemp->op1->text) * 4; 
+								if(tacTemp->op2->type == SYMBOL_LABEL || tacTemp->op2->type == SYMBOL_SCALAR){
+									fprintf(arquivoSaida,	"\n\t## Escrita em vetor ##\n"
 												"\tmovl %s(%%rip), %%eax\n"
 												"\tmovl %%eax, %s+%d(%%rip)\n",
-									  tac->op2->text, tac->res->text, pos); 
+									  tacTemp->op2->text, tacTemp->res->text, posicaoAtual); 
 								}else{
-									fprintf(arquivoSaida,	"\n\t## TAC_VEC_WRITE\n"
+									fprintf(arquivoSaida,	"\n\t## Escrita em vetor ##\n"
 												"\tmovl $%s, %%eax\n"
 												"\tmovl %%eax, %s+%d(%%rip)\n",
-									  tac->op2->text, tac->res->text, pos); 
+									  tacTemp->op2->text, tacTemp->res->text, posicaoAtual); 
 								}
 								break;
-			case TAC_ATRIB:  pos = atoi(tac->op2->text);
-								// caso em que a chave é um int
-								if(pos){
-									pos*=4;
-									fprintf(arquivoSaida,	"\n\t## TAC_ATRIB\n"
+			case TAC_ATRIB:  posicaoAtual = atoi(tacTemp->op2->text);
+								if(posicaoAtual){
+									posicaoAtual*=4;
+									fprintf(arquivoSaida,	"\n\t## Atribuicao ##\n"
 												"\tmovl %s+%d(%%rip), %%eax\n"
 												"\tmovl %%eax, %s(%%rip)\n",
-									  tac->op1->text, pos, tac->res->text); 
-								// caso em que a chave é um temporario
+									  tacTemp->op1->text, posicaoAtual, tacTemp->res->text); 
 								}else{ 
-									fprintf(arquivoSaida,	"\n\t## TAC_ATRIB\n"
+									fprintf(arquivoSaida,	"\n\t## Atribuicao ##\n"
 												"\tmovl %s(%%rip), %%eax\n"
 												"\tcltq\n"
 												"\tmovl %s(,%%rax, 4), %%eax\n"
 												"\tmovl %%eax, %s(%%rip)\n",
-									  tac->op2->text, tac->op1->text, tac->res->text); 
+									  tacTemp->op2->text, tacTemp->op1->text, tacTemp->res->text); 
 								} break;
-			case TAC_OR: fprintf(arquivoSaida,	"\n\t## TAC_OR\n"
+			case TAC_OR: fprintf(arquivoSaida,	"\n\t## || ##\n"
 											"\tmovl %s(%%rip), %%eax\n"
 											"\ttestl %%eax, %%eax\n"
 											"\tje .L%d\n"
@@ -320,12 +378,12 @@ void asmGen(TAC* tacParam, FILE* arquivoSaida){
 											".L%d:\n"
 											"\tmovl $0, %s(%%rip)\n"
 											".L%d:\n",
-										tac->op1->text, numLabel, tac->res->text, numLabel+2, 
-										numLabel, tac->op2->text, numLabel+1, tac->res->text, numLabel+2, 
-										numLabel+1, tac->res->text, numLabel+2); 
-										numLabel = numLabel + 3; 
+										tacTemp->op1->text, valorLabel, tacTemp->res->text, valorLabel+2, 
+										valorLabel, tacTemp->op2->text, valorLabel+1, tacTemp->res->text, valorLabel+2, 
+										valorLabel+1, tacTemp->res->text, valorLabel+2); 
+										valorLabel = valorLabel + 3; 
 										break;
-			case TAC_AND: fprintf(arquivoSaida,	"\n\t## TAC_AND\n"
+			case TAC_AND: fprintf(arquivoSaida,	"\n\t## && ##\n"
 											"\tmovl %s(%%rip), %%eax\n"
 											"\ttestl %%eax, %%eax\n"
 											"\tjne .L%d\n"
@@ -340,82 +398,18 @@ void asmGen(TAC* tacParam, FILE* arquivoSaida){
 											".L%d:\n"
 											"\tmovl $0, %s(%%rip)\n"
 											".L%d:\n",
-										tac->op1->text, numLabel, tac->res->text, numLabel+2, 
-										numLabel, tac->op2->text, numLabel+1, tac->res->text, numLabel+2, 
-										numLabel+1, tac->res->text, numLabel+2); 
-										numLabel = numLabel + 3; 
+										tacTemp->op1->text, valorLabel, tacTemp->res->text, valorLabel+2, 
+										valorLabel, tacTemp->op2->text, valorLabel+1, tacTemp->res->text, valorLabel+2, 
+										valorLabel+1, tacTemp->res->text, valorLabel+2); 
+										valorLabel = valorLabel + 3; 
 										break;
-			case TAC_NOT: fprintf(arquivoSaida, "\n\t## TAC_NOT\n"
+			case TAC_NOT: fprintf(arquivoSaida, "\n\t## ! ##\n"
 										  "\tcmpl $0, %s(%%rip)\n"
 										  "\tsete %%al\n"
 	                                      "\tmovzbl %%al, %%eax\n"
 	                                      "\tmovl %%eax, %s(%%rip)\n",
-										tac->op1->text, tac->res->text);
+										tacTemp->op1->text, tacTemp->res->text);
 										break;
-			case TAC_PRINT: if(tac->res->type == SYMBOL_LIT_STRING){
-								fprintf(arquivoSaida,	"\n\t## TAC_PRINT: STRING\n"
-											"\tmovl $.LC%d, %%edi\n"
-											"\tmovl $0, %%eax\n"
-											"\tcall printf\n",
-								  tac->posicaoParam); 
-							 }else{
-								fprintf(arquivoSaida,	"\n\t## TAC_PRINT: VAR\n"
-											"\tmovl %s(%%rip), %%eax\n"
-											"\tmovl %%eax, %%esi\n"
-											"\tmovl $.LC%d, %%edi\n"
-											"\tmovl $0, %%eax\n"
-											"\tcall printf\n",
-								  tac->res->text, tac->posicaoParam); 
-							 } 							
-							 break;
-			case TAC_READ: fprintf(arquivoSaida, "\n\t## TAC_READ\n"
-											"\tmovl $%s, %%esi\n"
-											"\tmovl	$.LC0, %%edi\n"
-											"\tmovl	$0, %%eax\n"
-											"\tcall	__isoc99_scanf\n"
-											"\tmovl	$0, %%eax\n",
-											tac->res->text);break;
-			case TAC_CALL:  numParamsCall = 0;
-							fprintf(arquivoSaida,	"\n\t## TAC_CALL\n"
-											"\tcall %s\n"
-											"\tmovl %%eax, %s(%%rip)\n",
-								  tac->op1->text, tac->res->text); 
-			case TAC_ID_CALL:	numParamsCall++;
-								fprintf(arquivoSaida,	"\n\t## TAC_ID_CALL\n");
-								if(tac->op1->type == SYMBOL_LABEL || tac->op1->type == SYMBOL_SCALAR){
-									fprintf(arquivoSaida,	"\tmovl %s(%%rip), ", tac->op1->text);
-								}else{
-									fprintf(arquivoSaida,	"\tmovl $%s, ", tac->op1->text);
-								}	
-								switch(numParamsCall){
-									case 1: fprintf(arquivoSaida,	"%%edi\n"); break;
-									case 2: fprintf(arquivoSaida,	"%%esi\n"); break;
-									case 3: fprintf(arquivoSaida,	"%%edx\n"); break;
-									case 4: fprintf(arquivoSaida,	"%%ecx\n"); break;
-									case 5: fprintf(arquivoSaida, "%%r8d\n"); break;
-									case 6: fprintf(arquivoSaida,	"%%r9d\n"); break;
-									default: fprintf(stderr,"Erro compilacao: Numero maximo de parametros suportado excedido\n");  exit(5);
-								}
-								break;
-			case TAC_ARG_RECEIVE:
-								numParamsReceive++;
-								fprintf(arquivoSaida,	"\n\t## TAC_ARG_RECEIVE\n");
-								switch(numParamsReceive){
-									case 1: fprintf(arquivoSaida,	"\tmovl %%edi, "); break;
-									case 2: fprintf(arquivoSaida,	"\tmovl %%esi, "); break;
-									case 3: fprintf(arquivoSaida,	"\tmovl %%edx, "); break;
-									case 4: fprintf(arquivoSaida,	"\tmovl %%ecx, "); break;
-									case 5: fprintf(arquivoSaida,	"\tmovl %%r8d, "); break;
-									case 6: fprintf(arquivoSaida,	"\tmovl %%r9d, "); break;
-									default: fprintf(stderr,"Erro compilacao: Numero maximo de parametros suportado excedido\n"); exit(5);
-								}
-								if(tac->res->type == SYMBOL_LABEL || tac->res->type == SYMBOL_SCALAR){
-								fprintf(arquivoSaida,	"%s(%%rip)\n", tac->res->text);
-								}else{
-									fprintf(arquivoSaida,	"$%s\n", tac->res->text);
-								}
-								if(tac->next->next->type != TAC_ARG_RECEIVE) numParamsReceive = 0;
-								break;
 			default: break; 
 		}
 	}
