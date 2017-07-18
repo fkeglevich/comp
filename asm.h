@@ -1,3 +1,14 @@
+/*
+Etapa 6 do trabalho de Compiladores (2017/1)
+
+Professor: Marcelo Johann
+
+Grupo:
+	Delton Vaz (00229779) (nick: ~davaz)
+	Flávio Keglevich (00229724)
+*/
+
+
 #ifndef ASM_HEADER
 #define ASM_HEADER
 
@@ -14,6 +25,6 @@
 #define SYMBOL_LIT_FALSE 6	
 #define SYMBOL_IDENTIFIER 7	
 
-void asmGen(TAC* first, FILE* output);
+void asmGen(TAC* tac, FILE* arquivoSaida);
 
 #endif

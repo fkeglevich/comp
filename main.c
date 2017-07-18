@@ -1,5 +1,5 @@
 /*
-Etapa 5 do trabalho de Compiladores (2017/1)
+Etapa 6 do trabalho de Compiladores (2017/1)
 
 Professor: Marcelo Johann
 
@@ -44,18 +44,17 @@ int main (int argv, char **argc)
 	yyparse();
 	hash_print();
 
+	//Impressão das TACs
+ 	//tacPrintForward(tacReverse(tacGenerate(ast)));
 
-	 fprintf(stderr,"<<TAC_SYMBOL's omitidas para facilitar a leitura.>>\n");
-	 tacPrintForward(tacReverse(tacGenerate(ast)));
-
-	FILE* asmFile = fopen("SAIDA_ASM.S", "w+");
-	if(asmFile == NULL){
-		fprintf(stderr, "%s", "Can't create asm file. \n");
+	FILE* arquivoSaidaAsm = fopen("SAIDA_ASM.S", "w+");
+	if(arquivoSaidaAsm == NULL){
+		fprintf(stderr, "%s", "Não foi possivel criar o arquivo ASM. \n");
 		exit(2);
 	}
 	
-	asmGen(tacReverse(tacGenerate(ast)), asmFile);
-	fclose(asmFile);
+	asmGen(tacReverse(tacGenerate(ast)), arquivoSaidaAsm);
+	fclose(arquivoSaidaAsm);
 	fclose(out);
 	//printf("Programa reconhecido com sucesso!\n");
 	exit(0);

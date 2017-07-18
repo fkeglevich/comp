@@ -20,5 +20,5 @@ tgz: clean
 	tar cvzf etapa6.tgz .
 
 clean:
-	rm -rf *o lex.yy.* y.tab.* etapa6 etapa6.tgz saidaAsm
+	rm -rf *o lex.yy.* y.tab.* etapa6 etapa6.tgz saidaAsm SAIDA_ASM.S
 
