@@ -1,5 +1,0 @@
-a : short  0 ;
-long  main ( ) {
-a = 10 ;
-print a  ;
-};
