@@ -4,6 +4,7 @@ a: short 0;
 i: long 0;
 v: long[10] 0 0 0 0 0 0 0 0 0 0; 
 mat: long[10]; 
+c: byte 'x';
 d: byte 65;
 
 
@@ -21,6 +22,13 @@ long main()
     i = i + 1;
     };
   print "Incrementado algumas vezes fica " a "\n";
+  when (a==5) then 
+    print "Parou no meio\n";
+  when (a==11) then
+    ;
+  when (a==11) then else
+    ;
+
   };
 
 
