@@ -93,7 +93,7 @@ inicio: programa		{checkProgram($1); ast = $1;};
 
 programa 
 		: declaracao programa	{$$ = ast_insert(AST_PROGRAM, NULL, $1, $2, NULL, NULL);}
-		| error ';' { yyerrok; }
+		| programa error '\n' {yyerrok;}
 		| {$$ = NULL;}
 		;
 	
@@ -105,7 +105,6 @@ declaracao
 declara_variavel
 		: TK_IDENTIFIER ':' tipo_variavel literal_numerica ';'					{printf("*-****************Declarou variável!!!!!\n"); $$ = ast_insert(AST_VAR_DEC, $1, $3, $4, NULL, NULL);}
 		| TK_IDENTIFIER ':' tipo_variavel '[' indice_vetor ']' inicializacao_vetor ';'	{$$ = ast_insert(AST_VEC_DEC, $1, $3, $5, $7, NULL);}
-		| error ';' {printf("ERROR!!!\n"); yyerrok; }
 		;
 
 indice_vetor : LIT_INTEGER	{$$ = ast_insert(AST_LITERAL, $1, NULL, NULL, NULL, NULL);};
@@ -133,7 +132,6 @@ tipo_variavel
 		;
 
 declara_funcao: tipo_variavel TK_IDENTIFIER '(' lista_parametros ')' comando ';'	{$$ = ast_insert(AST_FUNC_DEC, $2, $1, $4, $6, NULL);}
-		| error ';' { yyerrok; }
 		;	
 
 lista_parametros
@@ -147,7 +145,6 @@ declara_parametro: tipo_variavel TK_IDENTIFIER		{$$ = ast_insert(AST_DEC_ARGS, $
 lista_comandos
 		: comando ';' lista_comandos				{$$ = ast_insert(AST_COMMANDS, NULL, $1, $3, NULL, NULL);}
 		|									{$$ = NULL;}
-		| error ';' { yyerrok; }
 		;
 
 comando
