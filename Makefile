@@ -11,10 +11,10 @@ etapa7: y.tab.c lex.yy.c
 	gcc -o etapa7 lex.yy.c ast.c hash.c y.tab.c semantic.c tac.c asm.c
 	
 lex.yy.c: scanner.l
-	lex -d scanner.l
+	lex scanner.l
 	
 y.tab.c: parser.y
-	yacc -d parser.y
+	yacc -dy parser.y
 
 tgz: clean
 	tar cvzf etapa7.tgz .
