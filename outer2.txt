@@ -1,0 +1,26 @@
+a : short  0 ;
+b : short  0 ;
+i : long  0 ;
+long  main ( ) {
+b = funcaoImpressao();
+a = 10 ;
+for ( i = 1 to 10 ) print i  " " ;
+print " Digite um numero: \n"  ;
+read i ;
+print "O valor lido de i eh: "  i "\n" ;
+print adidie  ;
+};
+short  funcaoImpressao ( ) {
+print "Oi entrei na funcao linda!"  ;
+{
+{
+a = 23 ;
+;
+};
+a = 2 + 4 ;
+};
+};
+long  eno ( ) {
+a = 23 ;
+return 2 + 4 ;
+};

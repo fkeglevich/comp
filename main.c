@@ -8,7 +8,7 @@ Grupo:
 	Flávio Keglevich (00229724)
 */
 
-#include "asm.h"
+#include "opt.h"
 
 extern int getLineNumber();
 extern int isRunning();
@@ -42,7 +42,8 @@ int main (int argv, char **argc)
 
 	initMe();
 	yyparse();
-	//hash_print();
+	optimizeAst(ast);
+	hash_print();
 
 	//Impressão das TACs
  	//tacPrintForward(tacReverse(tacGenerate(ast)));
@@ -55,7 +56,9 @@ int main (int argv, char **argc)
 	
 	//asmGen(tacReverse(tacGenerate(ast)), arquivoSaidaAsm);
 	//fclose(arquivoSaidaAsm);
-	//fclose(out);
+	
+	ast_print_tree(ast);
+	fclose(out);
 	//printf("Programa reconhecido com sucesso!\n");
 	printf("Fim da main!\n");
 	exit(0);

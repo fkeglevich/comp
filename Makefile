@@ -8,7 +8,7 @@
 #
 
 etapa7: y.tab.c lex.yy.c
-	gcc -o etapa7 lex.yy.c ast.c hash.c y.tab.c semantic.c tac.c asm.c
+	gcc -o etapa7 lex.yy.c ast.c hash.c y.tab.c semantic.c tac.c asm.c opt.c
 	
 lex.yy.c: scanner.l
 	lex scanner.l
