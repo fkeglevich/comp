@@ -18,6 +18,7 @@ Grupo:
 int getLineNumber(void);
 
 extern int yylex();
+int hasSintaxError;
 TAC *tac;
 
 %}  
@@ -67,7 +68,7 @@ TAC *tac;
 %token OPERATOR_GE		271
 %token OPERATOR_EQ		272
 %token OPERATOR_NE		273
-%token OPERATOR_AND	274
+%token OPERATOR_AND		274
 %token OPERATOR_OR		275
 
 %token<symbol> TK_IDENTIFIER 		280
@@ -89,7 +90,7 @@ TAC *tac;
 
 %%
 
-inicio: programa		{checkProgram($1); ast = $1;};
+inicio: programa		{hasSintaxError = 0; checkProgram($1); ast = $1;};
 
 programa 
 		: declaracao programa	{$$ = ast_insert(AST_PROGRAM, NULL, $1, $2, NULL, NULL);}
@@ -103,7 +104,7 @@ declaracao
 		;
 		
 declara_variavel
-		: TK_IDENTIFIER ':' tipo_variavel literal_numerica ';'					{printf("*-****************Declarou variável!!!!!\n"); $$ = ast_insert(AST_VAR_DEC, $1, $3, $4, NULL, NULL);}
+		: TK_IDENTIFIER ':' tipo_variavel literal_numerica ';'					{ $$ = ast_insert(AST_VAR_DEC, $1, $3, $4, NULL, NULL);}
 		| TK_IDENTIFIER ':' tipo_variavel '[' indice_vetor ']' inicializacao_vetor ';'	{$$ = ast_insert(AST_VEC_DEC, $1, $3, $5, $7, NULL);}
 		;
 
@@ -205,6 +206,7 @@ controle_de_fluxo
 %%
 int yyerror(char* str)
 {
-	printf("Programa não reconhecido, erro: \"%s\" na linha: %d\n", str, getLineNumber()-1);
+	fprintf(stderr, "Programa não reconhecido, erro: \"%s\" na linha: %d\n", str, getLineNumber());
+	hasSintaxError = 1;
 	//exit(3);
 }

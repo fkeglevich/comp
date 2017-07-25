@@ -42,25 +42,34 @@ int main (int argv, char **argc)
 
 	initMe();
 	yyparse();
-	optimizeAst(ast);
-	hash_print();
 
-	//Impressão das TACs
- 	//tacPrintForward(tacReverse(tacGenerate(ast)));
+	if (hasSintaxError == 0)
+	{
+		optimizeAst(ast);
+		//hash_print();
 
-	//FILE* arquivoSaidaAsm = fopen("SAIDA_ASM.S", "w+");
-	//if(arquivoSaidaAsm == NULL){
-	//	fprintf(stderr, "%s", "Não foi possivel criar o arquivo ASM. \n");
-	//	exit(2);
-	//}
+		//Impressão das TACs
+	 	//tacPrintForward(tacReverse(tacGenerate(ast)));
+
+		FILE* arquivoSaidaAsm = fopen("SAIDA_ASM.S", "w+");
+		if(arquivoSaidaAsm == NULL){
+			fprintf(stderr, "%s", "Não foi possivel criar o arquivo ASM. \n");
+			exit(2);
+		}
 	
-	//asmGen(tacReverse(tacGenerate(ast)), arquivoSaidaAsm);
-	//fclose(arquivoSaidaAsm);
+		asmGen(tacReverse(tacGenerate(ast)), arquivoSaidaAsm);
+		fclose(arquivoSaidaAsm);
 	
-	ast_print_tree(ast);
+		ast_print_tree(ast);
+		
+		printf("Programa reconhecido com sucesso!\n");
+	}
+	else
+	{
+		printf("Erro ao reconhecer o programa!\n");
+	}
 	fclose(out);
-	//printf("Programa reconhecido com sucesso!\n");
-	printf("Fim da main!\n");
+	//printf("Fim da main!\n");
 	exit(0);
 	
 	return 0;

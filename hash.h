@@ -41,6 +41,7 @@ const char* getTokenName(int code);
 #define SYMBOL_SCALAR 		8
 #define SYMBOL_LABEL 		9
 
+extern int hasSintaxError;
 
 typedef struct hash_node {
 	int type;

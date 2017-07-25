@@ -1,24 +1,16 @@
 a : short  0 ;
 b : short  0 ;
 i : long  0 ;
-long  main ( ) 
+long  main ( ) {
 {
-   {
-      {
-         print "adidi"  ;
-         ;
-      };
-      {
-         {
-            print "adidi"  ;
-            ;
-         };
-         a = (b + (i * 2 )/ 3 )+ (b + (i * 2 )/ 3 );
-      };
-   };
+{
+print "adidi"  ;
+;
 };
-
+a = (b + (i * 2 )/ 3 )* 2 + 2 ;
+};
+};
 long  eno ( ) {
-	print "adidi"  ;
-	return b + (i * 2 )/ 3 ;
+print "adidi"  ;
+return b + (i * 2 )/ 3 ;
 };

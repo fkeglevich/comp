@@ -271,6 +271,6 @@ void optimizeInline(AST_NODE *root)
 
 void optimizeAst(AST_NODE *root)
 {
-	fprintf(stderr, "EDDIIE \n");
+	//fprintf(stderr, "EDDIIE \n");
 	optimizeInline(root);
 }

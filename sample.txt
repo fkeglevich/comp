@@ -3,7 +3,7 @@ b: short 0;
 i: long 0;
 long main()
   {
-  a = eno() + eno();
+  	a = eno() * 2 + 2;
   };
 
 long eno()
