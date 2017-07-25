@@ -42,21 +42,22 @@ int main (int argv, char **argc)
 
 	initMe();
 	yyparse();
-	hash_print();
+	//hash_print();
 
 	//Impressão das TACs
  	//tacPrintForward(tacReverse(tacGenerate(ast)));
 
-	FILE* arquivoSaidaAsm = fopen("SAIDA_ASM.S", "w+");
-	if(arquivoSaidaAsm == NULL){
-		fprintf(stderr, "%s", "Não foi possivel criar o arquivo ASM. \n");
-		exit(2);
-	}
+	//FILE* arquivoSaidaAsm = fopen("SAIDA_ASM.S", "w+");
+	//if(arquivoSaidaAsm == NULL){
+	//	fprintf(stderr, "%s", "Não foi possivel criar o arquivo ASM. \n");
+	//	exit(2);
+	//}
 	
-	asmGen(tacReverse(tacGenerate(ast)), arquivoSaidaAsm);
-	fclose(arquivoSaidaAsm);
-	fclose(out);
+	//asmGen(tacReverse(tacGenerate(ast)), arquivoSaidaAsm);
+	//fclose(arquivoSaidaAsm);
+	//fclose(out);
 	//printf("Programa reconhecido com sucesso!\n");
+	printf("Fim da main!\n");
 	exit(0);
 	
 	return 0;
