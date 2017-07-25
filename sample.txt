@@ -2,7 +2,7 @@ a: short 0;
 b: short 0;
 i: long 0;
 long main()
-  {
+  { sdfsdf
   b =  funcaoImpressao();
   a = 10;
   for (i = 1 to 10)
@@ -13,8 +13,8 @@ long main()
   print "O valor lido de i eh: " i "\n";
   
 
-  }
+  };
 
 short funcaoImpressao(){
   print "Oi entrei na funcao linda!";
-}
+};
